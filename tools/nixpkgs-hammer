@@ -1,0 +1,110 @@
+#!/bin/sh
+
+set -e
+
+scriptName=nixpkgs-hammer # do not use the .wrapped name
+scriptDir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
+overlaysPath="${scriptDir}/../overlays"
+
+usage() {
+    echo "Usage: $scriptName [<flags>...] <attr-paths>..."
+    echo
+    echo "Summary: check package expressions for common mistakes"
+    echo
+    echo "Flags:"
+    echo "    -f, --file <FILE>     evaluate FILE rather than the default"
+    echo "    --show-trace          show trace when error occurs"
+}
+
+die() {
+    echo "$scriptName: error: $1" >&2
+    exit 1
+}
+
+die_with_usage() {
+    echo "$scriptName: error: $1" >&2
+    usage
+    exit 1
+}
+
+escapeNixString() {
+    val=$1
+    val="${val//\\/\\\\}"
+    val="${val//\"/\\\"}"
+    echo "\"${val}\""
+}
+
+nixFile=
+attrPaths=()
+buildArgs=()
+
+while [ "$#" -gt 0 ]; do
+    arg="$1"; shift 1
+    case "$arg" in
+      --help)
+        usage
+        exit 0
+        ;;
+      --file=*)
+        nixFile="${arg#*=}"
+        ;;
+      --file|-f)
+        nixFile="$1"
+        shift 1
+        ;;
+      --show-trace)
+        buildArgs+=("$arg")
+        ;;
+      -*)
+        die "unknown option ‘${arg}’."
+        ;;
+      *)
+        attrPaths+=("$arg")
+        ;;
+    esac
+done
+
+if (( "${#attrPaths[*]}" == 0 )); then
+    die_with_usage "Too few attr-paths."
+fi
+
+if [[ -n "$nixFile" ]]; then
+    if [[ -e "$nixFile" ]]; then
+        # Absolutize so we can refer to it from tempdir.
+        nixFile=$(readlink -f "$nixFile")
+    fi
+    buildArgs+=("$nixFile")
+else
+    # Nix defaults to current directory when file not specified.
+    nixFile=$PWD
+fi
+
+attrsNix="[ "
+namePositions="[ "
+
+for attr in "${attrPaths[@]}"; do
+    buildArgs+=(-A "$attr")
+
+    attrsNix+="$(escapeNixString "$attr") "
+
+    namePositions+="($(nix-instantiate --eval -E "(let drv = (import $nixFile {}).${attr}; pname = builtins.unsafeGetAttrPos ''pname'' drv; in if pname != null then pname else builtins.unsafeGetAttrPos ''name'' drv)")) "
+done
+
+attrsNix+="]"
+namePositions+="]"
+
+buildArgs+=(--no-out-link)
+
+# Our overlays need to know the built attributes so that they can check only them.
+# We do it by using functions that return overlays so we need to instantiate them.
+saturatedOverlaysPath=$(mktemp -d)
+echo $saturatedOverlaysPath
+for f in $overlaysPath/*; do
+    overlay=$(basename "$f")
+    echo > "${saturatedOverlaysPath}/${overlay}" \
+        "import ${overlaysPath}/${overlay} { builtAttrs = $attrsNix; packageSet = $nixFile; namePositions = $namePositions; }"
+done
+
+buildArgs+=(-I "nixpkgs-overlays=$saturatedOverlaysPath")
+
+nix-build "${buildArgs[@]}"
