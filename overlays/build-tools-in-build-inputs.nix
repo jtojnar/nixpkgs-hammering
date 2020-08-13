@@ -3,9 +3,9 @@
 , namePositions
 }@attrs:
 
-self: super:
+final: prev:
 let
-  inherit (super) lib;
+  inherit (prev) lib;
   inherit (import ../lib { inherit lib; }) checkMkDerivationFor;
 
   buildTools = [
@@ -18,7 +18,7 @@ let
   checkDerivation = drv:
     (map
       (tool: {
-        cond = lib.elem super.${tool} (drv.buildInputs or [ ]);
+        cond = lib.elem prev.${tool} (drv.buildInputs or [ ]);
         msg = ''
           ${tool} is a build tool so it likely goes to nativeBuildInputs, not buildInputs.
 
@@ -29,4 +29,4 @@ let
     );
 
 in
-  checkMkDerivationFor attrs super checkDerivation
+  checkMkDerivationFor attrs prev checkDerivation
