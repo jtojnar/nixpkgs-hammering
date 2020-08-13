@@ -12,6 +12,7 @@
       install -D ${./tools/nixpkgs-hammer} $out/bin/$name
       patchShebangs $out/bin/$name
       ln -s ${./overlays} $out/overlays
+      ln -s ${./lib} $out/lib
     '';
 
     defaultPackage = self.packages.${system}.nixpkgs-hammer;
