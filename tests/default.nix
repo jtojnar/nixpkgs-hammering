@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? (import ../default.nix).inputs.nixpkgs.legacyPackages.${builtins.currentSystem}
 }:
 
 {

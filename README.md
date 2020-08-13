@@ -14,6 +14,12 @@ Run the following command in your nixpkgs directory:
 nix run -f https://github.com/jtojnar/nixpkgs-hammering/archive/master.tar.gz -c nixpkgs-hammer <attr-path>...
 ```
 
+or with Flakes-enabled Nix:
+
+```
+nix run github:jtojnar/nixpkgs-hammering <attr-path>...
+```
+
 ## How does this work?
 
 In order to make the checks not apply to unwanted derivations, we need to pass the information about our targets to the overlays. Unfortunately, we cannot use the attribute paths, since the `mkDerivation` function is not aware of them. Nix does offer minor meta-programming facility through `builtins.unsafeGetAttrPos` but we cannot use the positions of the attributes for the same reason. We could try matching the `name` attributes but there might be multiple packages with the same `name` depending on each other. But we can combine the two approaches and get the position of `name` attribute within the expression – this should uniquely identify the expression and be available among the `mkDerivation` arguments.
