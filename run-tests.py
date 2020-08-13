@@ -6,8 +6,8 @@ import subprocess
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
-def test_variant(rule, variant):
-    attr_path=f'{rule}.{variant}'
+def test_variant(rule, variant=None):
+    attr_path=f'{rule}.{variant}' if variant is not None else rule
     test_build = subprocess.run(
         [
             os.path.join(script_dir, 'tools/nixpkgs-hammer'),
@@ -26,12 +26,15 @@ def test_variant(rule, variant):
         print('\t\tok')
 
 
-def test_rule(rule, variants):
+def test_rule(rule, variants=None):
     print(f'Testing {rule}')
 
-    for variant in variants:
-        print(f'\t{variant}')
-        test_variant(rule, variant)
+    if variants is not None:
+        for variant in variants:
+            print(f'\t{variant}')
+            test_variant(rule, variant)
+    else:
+       test_variant(rule)
 
 
 if __name__ == '__main__':
