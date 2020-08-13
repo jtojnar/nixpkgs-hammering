@@ -3,4 +3,5 @@
 
 {
   build-tools-in-build-inputs = pkgs.recurseIntoAttrs (pkgs.callPackage ./build-tools-in-build-inputs { });
+  meson-cmake = pkgs.callPackage ./meson-cmake { };
 }

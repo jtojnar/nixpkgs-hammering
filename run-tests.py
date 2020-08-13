@@ -47,3 +47,7 @@ if __name__ == '__main__':
             'pkg-config',
         ],
     )
+
+    test_rule(
+        'meson-cmake'
+    )
