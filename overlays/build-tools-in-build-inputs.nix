@@ -7,7 +7,14 @@ self: super:
 let
   inherit (super) lib;
   attrByPathString = attrPath: lib.getAttrFromPath (lib.splitString "." attrPath);
-  warn = warnings: lib.warn (lib.concatMapStringsSep "\n" ({ msg, ... }: msg) (lib.filter ({ cond, ... }: cond) warnings));
+  warn = warnings:
+    let
+      matchedWarnings = lib.filter ({ cond, ... }: cond) warnings;
+    in
+      if builtins.length matchedWarnings > 0 then
+        lib.warn (lib.concatMapStringsSep "\n" ({ msg, ... }: msg) matchedWarnings)
+      else
+        lib.id;
 in
 {
   stdenv = super.stdenv // {
