@@ -49,6 +49,16 @@ if __name__ == '__main__':
     )
 
     test_rule(
+        'explicit-phases',
+        [
+            'configure',
+            'build',
+            'check',
+            'install',
+        ],
+    )
+
+    test_rule(
         'meson-cmake'
     )
 

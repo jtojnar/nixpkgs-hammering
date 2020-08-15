@@ -3,6 +3,7 @@
 
 {
   build-tools-in-build-inputs = pkgs.recurseIntoAttrs (pkgs.callPackage ./build-tools-in-build-inputs { });
+  explicit-phases = pkgs.callPackage ./explicit-phases { };
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
   patch-phase = pkgs.callPackage ./patch-phase { };

@@ -20,4 +20,4 @@ Many setup hooks make use of these hooks and not running them can also confuse d
   '';
 ```
 
-And if you just want to add a flag to `make` call, you might not even need to override the phases.
+And if you just want to add a flag to `make` call, you might not even need to override the phases, see [`explicit-phases`](explicit-phases.md) rule.
