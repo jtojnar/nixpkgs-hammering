@@ -2,9 +2,9 @@
 
 import os
 import subprocess
+import textwrap
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-
 
 def test_variant(rule, variant=None):
     attr_path=f'{rule}.{variant}' if variant is not None else rule
@@ -19,7 +19,8 @@ def test_variant(rule, variant=None):
     )
 
     if test_build.returncode != 0:
-        print('\t\terror building the test')
+        print('\t\terror building the test:')
+        print(textwrap.indent(test_build.stdout.decode('utf-8'), '\t' * 3))
     elif f'explanations/{rule}.md'.encode('utf-8') not in test_build.stdout:
         print('\t\terror matching the rule')
     else:
