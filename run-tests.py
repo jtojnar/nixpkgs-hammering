@@ -97,3 +97,19 @@ if __name__ == '__main__':
             'qt-derivation',
         ],
     )
+
+    test_rule(
+        'unclear-gpl',
+        [
+            'agpl3',
+            'fdl11',
+            'fdl12',
+            'fdl13',
+            'gpl1',
+            'gpl2',
+            'gpl3',
+            'lgpl2',
+            'lgpl21',
+            'lgpl3',
+        ],
+    )

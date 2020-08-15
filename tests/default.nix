@@ -8,5 +8,6 @@
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
   patch-phase = pkgs.callPackage ./patch-phase { };
+  unclear-gpl = pkgs.callPackage ./unclear-gpl { };
   unnecessary-parallel-building = pkgs.callPackage ./unnecessary-parallel-building { };
 }
