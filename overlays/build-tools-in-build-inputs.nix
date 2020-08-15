@@ -20,7 +20,7 @@ let
       (tool: {
         cond = lib.elem prev.${tool} (drv.buildInputs or [ ]);
         msg = ''
-          ${tool} is a build tool so it likely goes to nativeBuildInputs, not buildInputs.
+          ${tool} is a build tool so it likely goes to `nativeBuildInputs`, not `buildInputs`.
 
           See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/build-tools-in-build-inputs.md
         '';

@@ -2,6 +2,7 @@ If you are overriding `configurePhase`, `buildPhase`, `checkPhase`, `installPhas
 
 Many setup hooks make use of these hooks and not running them can also confuse developers adding hooks to the package.
 
+## Examples
 ### Before
 ```nix
   installPhase = ''
@@ -20,4 +21,5 @@ Many setup hooks make use of these hooks and not running them can also confuse d
   '';
 ```
 
+## Alternatives
 And if you just want to add a flag to `make` call, you might not even need to override the phases, see [`explicit-phases`](explicit-phases.md) rule.

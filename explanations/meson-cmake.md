@@ -8,5 +8,4 @@ Found CMake: NO?
 That is just an informational message you do not need to pay much heed. `pkg-config` is the preferred method for finding dependencies on UNIX systems and will be sufficient most of the time.
 
 ## What to do?
-
 Try removing `cmake` from dependencies and see if the package still builds.
