@@ -55,3 +55,13 @@ if __name__ == '__main__':
     test_rule(
         'patch-phase'
     )
+
+    test_rule(
+        'unnecessary-parallel-building',
+        [
+            'cmake',
+            'meson',
+            'qmake',
+            'qt-derivation',
+        ],
+    )
