@@ -59,6 +59,10 @@ if __name__ == '__main__':
     )
 
     test_rule(
+        'fixup-phase'
+    )
+
+    test_rule(
         'meson-cmake'
     )
 
