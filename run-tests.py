@@ -51,3 +51,7 @@ if __name__ == '__main__':
     test_rule(
         'meson-cmake'
     )
+
+    test_rule(
+        'patch-phase'
+    )

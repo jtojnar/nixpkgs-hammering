@@ -2,5 +2,10 @@ PREFIX ?= $(out)
 
 INSTALL ?= install
 
-install:
-	$(INSTALL) -Dt $(PREFIX) Makefile
+build: foo
+
+foo: foo.in
+	cp $< $@
+
+install: build
+	$(INSTALL) -Dt $(PREFIX) foo
