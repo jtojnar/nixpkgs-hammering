@@ -53,6 +53,24 @@ if __name__ == '__main__':
     )
 
     test_rule(
+        'missing-phase-hooks',
+        [
+            'configure-pre',
+            'configure-post',
+            'configure-both',
+            'build-pre',
+            'build-post',
+            'build-both',
+            'check-pre',
+            'check-post',
+            'check-both',
+            'install-pre',
+            'install-post',
+            'install-both',
+        ],
+    )
+
+    test_rule(
         'patch-phase'
     )
 
