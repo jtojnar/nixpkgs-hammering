@@ -2,6 +2,7 @@
 }:
 
 {
+  # positive cases
   agpl3 = pkgs.callPackage ./agpl3.nix { };
   fdl11 = pkgs.callPackage ./fdl11.nix { };
   fdl12 = pkgs.callPackage ./fdl12.nix { };
@@ -12,4 +13,7 @@
   lgpl2 = pkgs.callPackage ./lgpl2.nix { };
   lgpl21 = pkgs.callPackage ./lgpl21.nix { };
   lgpl3 = pkgs.callPackage ./lgpl3.nix { };
+
+  # negative cases
+  single-nonmatching-license = pkgs.callPackage ./single-nonmatching-license.nix { };
 }

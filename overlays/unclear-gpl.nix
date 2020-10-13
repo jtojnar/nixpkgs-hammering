@@ -24,7 +24,7 @@ let
   checkDerivation = drv:
     (map
       (license: {
-        cond = lib.elem lib.licenses.${license} (drv.meta.license or []);
+        cond = lib.elem lib.licenses.${license} (lib.toList (drv.meta.license or []));
         msg = ''
           `${license}` is a deprecated license, check if project uses `${license}Plus` or `${license}Only` and change `meta.license` accordingly.
 

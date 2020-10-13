@@ -7,7 +7,7 @@ import unittest
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-def make_test_variant(rule, variant=None):
+def make_test_variant(rule, variant=None, should_match=True):
     def case():
         attr_path=f'{rule}.{variant}' if variant is not None else rule
         test_build = subprocess.run(
@@ -22,17 +22,25 @@ def make_test_variant(rule, variant=None):
 
         if test_build.returncode != 0:
             raise Exception('error building the test:' + test_build.stdout.decode('utf-8'))
-        elif f'explanations/{rule}.md'.encode('utf-8') not in test_build.stdout:
-            raise Exception('error matching the rule')
+        else:
+            matches = f'explanations/{rule}.md'.encode('utf-8') in test_build.stdout
+            if should_match and not matches:
+                raise Exception('error matching the rule')
+            elif not should_match and matches:
+                raise Exception('rule should not match')
 
     return case
 
 
-def make_test_rule(rule, variants=None):
-    if variants is not None:
+def make_test_rule(rule, matching_variants=None, nonmatching_variants=[]):
+    if matching_variants is not None:
         suite = unittest.TestSuite()
-        for variant in variants:
+        for variant in matching_variants:
             suite.addTest(FunctionTestCase(make_test_variant(rule, variant), description=f'{rule}.{variant}'))
+
+        for variant in nonmatching_variants:
+            suite.addTest(FunctionTestCase(make_test_variant(rule, variant, should_match=False), description=f'{rule}.{variant}'))
+
         return suite
     else:
        return FunctionTestCase(make_test_variant(rule), description=rule)
@@ -126,6 +134,9 @@ class TestSuite(unittest.TestSuite):
                 'lgpl21',
                 'lgpl3',
             ],
+            [
+                'single-nonmatching-license',
+            ]
         )
 
 def load_tests(loader, tests, pattern):
