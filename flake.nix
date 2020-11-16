@@ -1,11 +1,18 @@
 {
   description = "Tool for pointing out issues in Nixpkgs packages";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs = {
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
 
-  inputs.utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-  outputs = { self, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
+    utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs = { self, flake-compat, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
   in {
     packages.nixpkgs-hammer = pkgs.runCommand "nixpkgs-hammer" { } ''
