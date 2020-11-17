@@ -61,6 +61,16 @@ class TestSuite(unittest.TestSuite):
 
     def __iter__(self):
         yield make_test_rule(
+            'attribute-ordering',
+            [
+                'out-of-order',
+            ],
+            [
+                'properly-ordered',
+            ]
+        )
+
+        yield make_test_rule(
             'build-tools-in-build-inputs',
             [
                 'cmake',

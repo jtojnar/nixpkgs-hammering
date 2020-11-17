@@ -2,6 +2,7 @@
 }:
 
 {
+  attribute-ordering = pkgs.callPackage ./attribute-ordering { };
   build-tools-in-build-inputs = pkgs.recurseIntoAttrs (pkgs.callPackage ./build-tools-in-build-inputs { });
   explicit-phases = pkgs.callPackage ./explicit-phases { };
   fixup-phase = pkgs.callPackage ./fixup-phase { };
