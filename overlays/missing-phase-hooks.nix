@@ -22,7 +22,7 @@ let
           preMissing = builtins.match ".*runHook pre${capitalize phase}.*"  drv."${phase}Phase" == null;
           postMissing = builtins.match ".*runHook post${capitalize phase}.*" drv."${phase}Phase" == null;
         in {
-          cond = drv ? "${phase}Phase" && (preMissing || postMissing);
+          cond = drv ? "${phase}Phase" && drv."${phase}Phase" != null && (preMissing || postMissing);
           msg = ''
             `${phase}Phase` should probably contain ${lib.optionalString preMissing "`runHook pre${capitalize phase}`"}${lib.optionalString (preMissing && postMissing) " and "}${lib.optionalString postMissing "`runHook post${capitalize phase}`"}.
 
