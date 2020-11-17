@@ -12,9 +12,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install Nix
-      uses: cachix/install-nix-action@v10
-      with:
-        skip_adding_nixpkgs_channel: true # We are using flakes
+      uses: cachix/install-nix-action@v12
 
     - name: Run tests
       run: ./run-tests.py
