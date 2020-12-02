@@ -1,110 +1,107 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-set -e
+from pathlib import Path
+import argparse
+import subprocess
+import tempfile
 
-scriptName=nixpkgs-hammer # do not use the .wrapped name
-scriptDir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
-overlaysPath="${scriptDir}/../overlays"
 
-usage() {
-    echo "Usage: $scriptName [<flags>...] <attr-paths>..."
-    echo
-    echo "Summary: check package expressions for common mistakes"
-    echo
-    echo "Flags:"
-    echo "    -f, --file <FILE>     evaluate FILE rather than the default"
-    echo "    --show-trace          show trace when error occurs"
-}
+def escape_nix_string(val: str) -> str:
+    return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
-die() {
-    echo "$scriptName: error: $1" >&2
-    exit 1
-}
 
-die_with_usage() {
-    echo "$scriptName: error: $1" >&2
-    usage
-    exit 1
-}
+def nix_eval(expr: str) -> str:
+    return subprocess.check_output(
+        ['nix-instantiate', '--eval', '-E', expr],
+        encoding='utf-8',
+    )
 
-escapeNixString() {
-    val=$1
-    val="${val//\\/\\\\}"
-    val="${val//\"/\\\"}"
-    echo "\"${val}\""
-}
 
-nixFile=
-attrPaths=()
-buildArgs=()
+def main(args):
+    script_dir = Path(__file__).parent
+    overlay_generators_path = (script_dir.parent / 'overlays').absolute()
 
-while [ "$#" -gt 0 ]; do
-    arg="$1"; shift 1
-    case "$arg" in
-      --help)
-        usage
-        exit 0
-        ;;
-      --file=*)
-        nixFile="${arg#*=}"
-        ;;
-      --file|-f)
-        nixFile="$1"
-        shift 1
-        ;;
-      --show-trace)
-        buildArgs+=("$arg")
-        ;;
-      -*)
-        die "unknown option ‘${arg}’."
-        ;;
-      *)
-        attrPaths+=("$arg")
-        ;;
-    esac
-done
+    build_args = [
+        args.nix_file,
+    ]
 
-if (( "${#attrPaths[*]}" == 0 )); then
-    die_with_usage "Too few attr-paths."
-fi
+    if args.show_trace:
+        build_args.append('--show-trace')
 
-if [[ -n "$nixFile" ]]; then
-    if [[ -e "$nixFile" ]]; then
+    attrs_nix = []
+    name_positions = []
+
+    for attr in args.attr_paths:
+        build_args.extend(['-A', attr])
+
+        attrs_nix.append(escape_nix_string(attr))
+
+        name_position = nix_eval(
+            f'''
+            let
+                drv = (import {args.nix_file} {{}}).{attr};
+                pname = builtins.unsafeGetAttrPos "pname" drv;
+            in
+                if pname != null then
+                    pname
+                else
+                    builtins.unsafeGetAttrPos "name" drv
+            '''
+        )
+        name_positions.append('(' + name_position + ')')
+
+    build_args.append('--no-out-link')
+
+    # Our overlays need to know the built attributes so that they can check only them.
+    # We do it by using functions that return overlays so we need to instantiate them.
+    with tempfile.TemporaryDirectory() as saturated_overlays_tempdir:
+        saturated_overlays_path = Path(saturated_overlays_tempdir)
+        for overlay_generator in overlay_generators_path.glob('*'):
+            overlay = overlay_generator.name
+            with open(saturated_overlays_path / overlay, 'w') as generated_overlay:
+                generated_overlay.write(
+                    f'''
+                    import {overlay_generators_path}/{overlay} {{
+                        builtAttrs = [ {" ".join(attrs_nix)} ];
+                        packageSet = {args.nix_file};
+                        namePositions = [ {" ".join(name_positions)} ];
+                    }}
+                    '''
+                )
+
+        build_args.extend(['-I', f'nixpkgs-overlays={saturated_overlays_path}'])
+
+        subprocess.run(['nix-build'] + build_args, check=True)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='check package expressions for common mistakes',
+    )
+    parser.add_argument(
+        '-f',
+        '--file',
+        dest='nix_file',
+        metavar='FILE',
         # Absolutize so we can refer to it from tempdir.
-        nixFile=$(readlink -f "$nixFile")
-    fi
-    buildArgs+=("$nixFile")
-else
-    # Nix defaults to current directory when file not specified.
-    nixFile=$PWD
-fi
+        type=lambda p: Path(p).resolve(strict=True),
+        # Nix defaults to current directory when file not specified.
+        default=Path.cwd(),
+        help='evaluate FILE rather than the default',
+    )
+    parser.add_argument(
+        '--show-trace',
+        dest='show_trace',
+        action='store_true',
+        help='show trace when error occurs',
+    )
+    parser.add_argument(
+        'attr_paths',
+        metavar='attr-path',
+        nargs='+',
+        help='Attribute path of package to update',
+    )
 
-attrsNix="[ "
-namePositions="[ "
+    args = parser.parse_args()
 
-for attr in "${attrPaths[@]}"; do
-    buildArgs+=(-A "$attr")
-
-    attrsNix+="$(escapeNixString "$attr") "
-
-    namePositions+="($(nix-instantiate --eval -E "(let drv = (import $nixFile {}).${attr}; pname = builtins.unsafeGetAttrPos ''pname'' drv; in if pname != null then pname else builtins.unsafeGetAttrPos ''name'' drv)")) "
-done
-
-attrsNix+="]"
-namePositions+="]"
-
-buildArgs+=(--no-out-link)
-
-# Our overlays need to know the built attributes so that they can check only them.
-# We do it by using functions that return overlays so we need to instantiate them.
-saturatedOverlaysPath=$(mktemp -d)
-echo $saturatedOverlaysPath
-for f in $overlaysPath/*; do
-    overlay=$(basename "$f")
-    echo > "${saturatedOverlaysPath}/${overlay}" \
-        "import ${overlaysPath}/${overlay} { builtAttrs = $attrsNix; packageSet = $nixFile; namePositions = $namePositions; }"
-done
-
-buildArgs+=(-I "nixpkgs-overlays=$saturatedOverlaysPath")
-
-nix-build "${buildArgs[@]}"
+    main(args)
