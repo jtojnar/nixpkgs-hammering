@@ -1,4 +1,5 @@
-{ pkgs ? (import ../default.nix).inputs.nixpkgs.legacyPackages.${builtins.currentSystem}
+{ overlays ? []
+, pkgs ? import (import ../default.nix).inputs.nixpkgs.outPath { inherit overlays; }
 }:
 
 {

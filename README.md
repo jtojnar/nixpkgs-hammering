@@ -2,7 +2,7 @@
 
 There are many idioms in nixpkgs which beginner packagers might not be aware of. This is a set of nit-picky rules that aim to point out and explain common mistakes in nixpkgs package pull requests.
 
-This repository contains a bunch of [overlays](https://nixos.org/nixpkgs/manual/#chap-overlays) that add extra checks to `stdenv.mkDerivation` and other similar nixpkgs tools. The `nixpkgs-hammer` command will try to build the specified attributes with the overlays, making sure the warnings only touch the attributes you care about, not their dependencies.
+This repository contains a bunch of [overlays](https://nixos.org/nixpkgs/manual/#chap-overlays) that add extra checks to `stdenv.mkDerivation` and other similar nixpkgs tools. The `nixpkgs-hammer` command will try to evaluate the specified attributes with the overlays, making sure the warnings only touch the attributes you care about, not their dependencies.
 
 *Note that while these rules almost always apply, there are some exceptions. Please read the explanations before taking an action.*
 

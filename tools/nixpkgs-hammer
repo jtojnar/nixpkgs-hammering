@@ -2,8 +2,9 @@
 
 from pathlib import Path
 import argparse
+import json
 import subprocess
-import tempfile
+import sys
 
 
 def escape_nix_string(val: str) -> str:
@@ -15,6 +16,55 @@ def nix_eval(expr: str) -> str:
         ['nix-instantiate', '--eval', '-E', expr],
         encoding='utf-8',
     )
+
+
+def nix_eval_json(expr: str):
+    result = subprocess.check_output(
+        ['nix-instantiate', '--strict', '--json', '--eval', '-E', expr],
+        encoding='utf-8',
+    )
+    return json.loads(result)
+
+
+def yellow(msg):
+    return f'[1;33m{msg}[0m'
+
+
+def red(msg):
+    return f'[1;31m{msg}[0m'
+
+
+def stringify_location(file, line, column):
+    with open(file, 'r') as opened_file:
+        all_lines = opened_file.read().splitlines()
+        line_contents = all_lines[line - 1]
+        line_spaces = ' ' * len(str(line))
+        pointer = ' ' * (column - 1) + '^'
+
+        location_lines = [
+            'Near ' + file + ':' + str(line) + ':' + str(column) + ':',
+            line_spaces + ' |',
+            str(line) + ' | ' + line_contents,
+            line_spaces + ' | ' + pointer,
+        ]
+
+    return '\n'.join(location_lines)
+
+
+def stringify_message(name, msg, locations=[], cond=True, link=True, severity='warning'):
+    color = red if severity == 'error' else yellow
+
+    message_lines = [
+        color(f'{severity}: {name}'),
+        msg,
+    ] + list(map(lambda loc: stringify_location(**loc), locations))
+
+    if link:
+        message_lines.append(
+            f'See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/{name}.md',
+        )
+
+    return '\n'.join(message_lines)
 
 
 def main(args):
@@ -29,17 +79,30 @@ def main(args):
         build_args.append('--show-trace')
 
     attrs_nix = []
+    attr_messages = []
     name_positions = []
 
     for attr in args.attr_paths:
-        build_args.extend(['-A', attr])
-
         attrs_nix.append(escape_nix_string(attr))
+
+        attr_messages.append(
+            f'''
+            (if pkgs.{attr} or null == null then
+                [ {{
+                    name = "AttrPathNotFound";
+                    msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
+                    severity = "error";
+                    link = false;
+                }} ]
+            else
+                pkgs.{attr}.__nixpkgs-hammering-state.reports or [])
+            '''
+        )
 
         name_position = nix_eval(
             f'''
             let
-                drv = (import {args.nix_file} {{}}).{attr};
+                drv = (import {args.nix_file} {{ }}).{attr};
                 pname = builtins.unsafeGetAttrPos "pname" drv;
             in
                 if pname != null then
@@ -50,28 +113,35 @@ def main(args):
         )
         name_positions.append('(' + name_position + ')')
 
-    build_args.append('--no-out-link')
-
     # Our overlays need to know the built attributes so that they can check only them.
     # We do it by using functions that return overlays so we need to instantiate them.
-    with tempfile.TemporaryDirectory() as saturated_overlays_tempdir:
-        saturated_overlays_path = Path(saturated_overlays_tempdir)
-        for overlay_generator in overlay_generators_path.glob('*'):
-            overlay = overlay_generator.name
-            with open(saturated_overlays_path / overlay, 'w') as generated_overlay:
-                generated_overlay.write(
-                    f'''
-                    import {overlay_generators_path}/{overlay} {{
-                        builtAttrs = [ {" ".join(attrs_nix)} ];
-                        packageSet = {args.nix_file};
-                        namePositions = [ {" ".join(name_positions)} ];
-                    }}
-                    '''
-                )
+    overlay_expressions = []
+    for overlay_generator in overlay_generators_path.glob('*'):
+        overlay = overlay_generator.name
+        overlay_expressions.append(
+            f'''
+            (import {overlay_generators_path}/{overlay} {{
+                builtAttrs = [ {" ".join(attrs_nix)} ];
+                packageSet = {args.nix_file};
+                namePositions = [ {" ".join(name_positions)} ];
+            }})
+            '''
+        )
 
-        build_args.extend(['-I', f'nixpkgs-overlays={saturated_overlays_path}'])
+    messages = nix_eval_json(
+        f'''
+        let
+            pkgs = import {args.nix_file} {{
+                overlays = [
+                    {" ".join(overlay_expressions)}
+                ];
+            }};
+        in
+            builtins.concatLists [ {" ".join(attr_messages)} ]
+        ''',
+    )
 
-        subprocess.run(['nix-build'] + build_args, check=True)
+    print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
 
 
 if __name__ == '__main__':
@@ -83,11 +153,11 @@ if __name__ == '__main__':
         '--file',
         dest='nix_file',
         metavar='FILE',
-        # Absolutize so we can refer to it from tempdir.
+        # Absolutize so we can refer to it from Nix.
         type=lambda p: Path(p).resolve(strict=True),
         # Nix defaults to current directory when file not specified.
         default=Path.cwd(),
-        help='evaluate FILE rather than the default',
+        help='evaluate attributes in given path rather than the default (current working directory). The path needs to be importable by Nix and the imported value has to accept attribute set with overlays attribute as an argument.',
     )
     parser.add_argument(
         '--show-trace',
