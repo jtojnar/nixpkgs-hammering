@@ -42,15 +42,18 @@ rec {
       else
         lib.id;
 
+  # Creates an overlay that replaces stdenv.mkDerivation with a function that,
+  # for packages with locations of name attribute matching one of the namePositions,
+  # checks the attribute set passed as argument to mkDerivation.
   checkMkDerivationFor =
-    { builtAttrs
-    , packageSet
-    , namePositions
+    check:
+
+    { namePositions
+    , ...
     }:
 
+    final:
     prev:
-
-    check:
 
     {
       stdenv = prev.stdenv // {

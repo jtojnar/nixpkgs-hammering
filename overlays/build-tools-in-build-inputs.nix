@@ -31,4 +31,4 @@ let
     );
 
 in
-  checkMkDerivationFor attrs prev checkDerivation
+  checkMkDerivationFor checkDerivation attrs final prev
