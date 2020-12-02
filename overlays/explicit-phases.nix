@@ -18,12 +18,14 @@ let
   checkDerivation = drv:
     (map
       (phase: {
+        name = "explicit-phases";
         cond = drv ? "${phase}Phase";
         msg = ''
           It is a good idea to avoid overriding `${phase}Phase` when possible.
-
-          See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/explicit-phases.md
         '';
+        locations = [
+          (builtins.unsafeGetAttrPos "${phase}Phase" drv)
+        ];
       })
       phases
     );

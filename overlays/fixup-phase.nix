@@ -10,12 +10,14 @@ let
 
   checkDerivation = drv:
     lib.singleton {
+      name = "fixup-phase";
       cond = drv ? fixupPhase;
       msg = ''
         `fixupPhase` should not be overridden, use `postFixup` instead.
-
-        See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/fixup-phase.md
       '';
+      locations = [
+        (builtins.unsafeGetAttrPos "fixupPhase" drv)
+      ];
     };
 
 in

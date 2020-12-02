@@ -24,12 +24,14 @@ let
   checkDerivation = drv:
     (map
       (license: {
+        name = "unclear-gpl";
         cond = lib.elem lib.licenses.${license} (lib.toList (drv.meta.license or []));
         msg = ''
           `${license}` is a deprecated license, check if project uses `${license}Plus` or `${license}Only` and change `meta.license` accordingly.
-
-          See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/unclear-gpl.md
         '';
+        locations = [
+          (builtins.unsafeGetAttrPos "license" drv.meta)
+        ];
       })
       licenses
     );

@@ -42,12 +42,15 @@ let
           fstInfo = preferredOrdering.${fst};
           sndInfo = preferredOrdering.${snd};
         in {
+          name = "attribute-ordering";
           cond = fstInfo.order > sndInfo.order;
           msg = ''
             The ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}, including the "}attribute “${fst}” should preferably come before ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}’ "}“${snd}” attribute in the expression.
-
-            See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/attribute-ordering.md
           '';
+          locations = [
+            (builtins.unsafeGetAttrPos fst drv)
+            (builtins.unsafeGetAttrPos snd drv)
+          ];
         }
       );
 

@@ -10,12 +10,14 @@ let
 
   checkDerivation = drv:
     lib.singleton {
+      name = "meson-cmake";
       cond = lib.elem prev.meson (drv.nativeBuildInputs or [ ]) && lib.elem prev.cmake (drv.nativeBuildInputs or [ ]);
       msg = ''
         Meson uses CMake as a fallback dependency resolution method and it likely is not necessary here. The message about cmake not being found is purely informational.
-
-        See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/meson-cmake.md
       '';
+      locations = [
+        (builtins.unsafeGetAttrPos "nativeBuildInputs" drv)
+      ];
     };
 
 in

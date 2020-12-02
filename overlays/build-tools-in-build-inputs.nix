@@ -18,12 +18,14 @@ let
   checkDerivation = drv:
     (map
       (tool: {
+        name = "build-tools-in-build-inputs";
         cond = lib.elem prev.${tool} (drv.buildInputs or [ ]);
         msg = ''
           ${tool} is a build tool so it likely goes to `nativeBuildInputs`, not `buildInputs`.
-
-          See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/build-tools-in-build-inputs.md
         '';
+        locations = [
+          (builtins.unsafeGetAttrPos "buildInputs" drv)
+        ];
       })
       buildTools
     );

@@ -10,12 +10,14 @@ let
 
   checkDerivation = drv:
     lib.singleton {
+      name = "patch-phase";
       cond = drv ? patchPhase;
       msg = ''
         `patchPhase` should not be overridden, use `postPatch` instead.
-
-        See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/patch-phase.md
       '';
+      locations = [
+        (builtins.unsafeGetAttrPos "patchPhase" drv)
+      ];
     };
 
 in

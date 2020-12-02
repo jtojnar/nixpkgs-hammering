@@ -22,12 +22,14 @@ let
           preMissing = builtins.match ".*runHook pre${capitalize phase}.*"  drv."${phase}Phase" == null;
           postMissing = builtins.match ".*runHook post${capitalize phase}.*" drv."${phase}Phase" == null;
         in {
+          name = "missing-phase-hooks";
           cond = drv ? "${phase}Phase" && drv."${phase}Phase" != null && (preMissing || postMissing);
           msg = ''
             `${phase}Phase` should probably contain ${lib.optionalString preMissing "`runHook pre${capitalize phase}`"}${lib.optionalString (preMissing && postMissing) " and "}${lib.optionalString postMissing "`runHook post${capitalize phase}`"}.
-
-            See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/missing-phase-hooks.md
           '';
+          locations = [
+            (builtins.unsafeGetAttrPos "${phase}Phase" drv)
+          ];
         }
       )
       phases

@@ -10,6 +10,7 @@ let
 
   checkDerivation = drv:
     lib.singleton {
+      name = "unnecessary-parallel-building";
       cond =
         let
           inputs = drv.nativeBuildInputs or [ ] ++ drv.propagatedBuildInputs or [ ] ++ drv.nativeBuildInputs or [ ];
@@ -17,9 +18,10 @@ let
           (lib.elem prev.meson inputs || lib.elem prev.cmake inputs || lib.elem prev.qt5.qmake inputs) && drv.enableParallelBuilding or false;
       msg = ''
         Meson, CMake and qmake already set `enableParallelBuilding = true` by default so it is not necessary.
-
-        See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/unnecessary-parallel-building.md
       '';
+      locations = [
+        (builtins.unsafeGetAttrPos "enableParallelBuilding" drv)
+      ];
     };
 
 in
