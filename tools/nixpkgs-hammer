@@ -5,6 +5,7 @@ import argparse
 import json
 import subprocess
 import sys
+import textwrap
 
 
 def escape_nix_string(val: str) -> str:
@@ -40,6 +41,10 @@ def red(msg):
 
 def green(msg):
     return f'[1;32m{msg}[0m'
+
+
+def indent(text: str, steps=1) -> str:
+    return textwrap.indent(text, ' ' * 4 * steps)
 
 
 def stringify_location(file, line, column):
@@ -93,7 +98,7 @@ def main(args):
     for attr in args.attr_paths:
         attrs_nix.append(escape_nix_string(attr))
 
-        attr_messages.append(
+        attr_messages.append(textwrap.dedent(
             f'''
             "{attr}" = if pkgs.{attr} or null == null then
                 [ {{
@@ -105,9 +110,9 @@ def main(args):
             else
                 pkgs.{attr}.__nixpkgs-hammering-state.reports or [];
             '''
-        )
+        ))
 
-        name_position = nix_eval(
+        name_position = nix_eval(textwrap.dedent(
             f'''
             let
                 drv = (import {args.nix_file} {{ }}).{attr};
@@ -118,8 +123,8 @@ def main(args):
                 else
                     builtins.unsafeGetAttrPos "name" drv
             '''
-        )
-        name_positions.append('(' + name_position + ')')
+        ))
+        name_positions.append('(' + name_position.strip() + ')')
 
     # Our overlays need to know the built attributes so that they can check only them.
     # We do it by using functions that return overlays so we need to instantiate them.
@@ -129,28 +134,35 @@ def main(args):
             continue
 
         overlay = overlay_generator.name
-        overlay_expressions.append(
+        overlay_expressions.append(textwrap.dedent(
             f'''
             (import {overlay_generators_path}/{overlay} {{
-                builtAttrs = [ {" ".join(attrs_nix)} ];
-                packageSet = {args.nix_file};
-                namePositions = [ {" ".join(name_positions)} ];
+                inherit builtAttrs packageSet namePositions;
             }})
             '''
-        )
+        ))
 
-    all_messages = nix_eval_json(
+    name_positions_nix = '[\n' + indent('\n'.join(name_positions)) + '\n]' if name_positions else '[ ]'
+    attr_messages_nix = '{\n' + indent(''.join(attr_messages)) + '\n}' if attr_messages else '{ }'
+    overlays_nix = '[\n' + indent(''.join(overlay_expressions)) + '\n]' if name_positions else '[ ]'
+    all_messages_nix = textwrap.dedent(
         f'''
         let
+            builtAttrs = [ {" ".join(attrs_nix)} ];
+            packageSet = {args.nix_file};
+            namePositions = {indent(name_positions_nix, 2 + 1).strip()};
+
             pkgs = import {args.nix_file} {{
-                overlays = [
-                    {" ".join(overlay_expressions)}
-                ];
+                overlays = {indent(overlays_nix, 2 + 2).strip()};
             }};
-        in
-            {{ {" ".join(attr_messages)} }}
-        ''',
+        in {indent(attr_messages_nix, 2 + 0).strip()}
+        '''
     )
+
+    if args.show_trace:
+        print('Nix expression:', all_messages_nix, file=sys.stderr)
+
+    all_messages = nix_eval_json(all_messages_nix)
 
     for attr, messages in all_messages.items():
         print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
