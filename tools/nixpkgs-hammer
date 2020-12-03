@@ -26,12 +26,20 @@ def nix_eval_json(expr: str):
     return json.loads(result)
 
 
+def bold(msg):
+    return f'[1m{msg}[0m'
+
+
 def yellow(msg):
     return f'[1;33m{msg}[0m'
 
 
 def red(msg):
     return f'[1;31m{msg}[0m'
+
+
+def green(msg):
+    return f'[1;32m{msg}[0m'
 
 
 def stringify_location(file, line, column):
@@ -87,7 +95,7 @@ def main(args):
 
         attr_messages.append(
             f'''
-            (if pkgs.{attr} or null == null then
+            "{attr}" = if pkgs.{attr} or null == null then
                 [ {{
                     name = "AttrPathNotFound";
                     msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
@@ -95,7 +103,7 @@ def main(args):
                     link = false;
                 }} ]
             else
-                pkgs.{attr}.__nixpkgs-hammering-state.reports or [])
+                pkgs.{attr}.__nixpkgs-hammering-state.reports or [];
             '''
         )
 
@@ -131,7 +139,7 @@ def main(args):
             '''
         )
 
-    messages = nix_eval_json(
+    all_messages = nix_eval_json(
         f'''
         let
             pkgs = import {args.nix_file} {{
@@ -140,11 +148,17 @@ def main(args):
                 ];
             }};
         in
-            builtins.concatLists [ {" ".join(attr_messages)} ]
+            {{ {" ".join(attr_messages)} }}
         ''',
     )
 
-    print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
+    for attr, messages in all_messages.items():
+        print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
+        if len(messages) > 0:
+            print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
+        else:
+            print(green('No issues found.'), file=sys.stderr)
+        print(file=sys.stderr)
 
 
 if __name__ == '__main__':
@@ -175,7 +189,7 @@ if __name__ == '__main__':
         dest='excluded_rules',
         action='append',
         default=[],
-        help='rule to exclude',
+        help='rule to exclude (can be passed repeatedly)',
     )
     parser.add_argument(
         'attr_paths',
