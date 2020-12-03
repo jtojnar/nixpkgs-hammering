@@ -117,6 +117,9 @@ def main(args):
     # We do it by using functions that return overlays so we need to instantiate them.
     overlay_expressions = []
     for overlay_generator in overlay_generators_path.glob('*'):
+        if overlay_generator.stem in args.excluded_rules:
+            continue
+
         overlay = overlay_generator.name
         overlay_expressions.append(
             f'''
@@ -164,6 +167,15 @@ if __name__ == '__main__':
         dest='show_trace',
         action='store_true',
         help='show trace when error occurs',
+    )
+    parser.add_argument(
+        '-e',
+        '--exclude',
+        metavar='rule',
+        dest='excluded_rules',
+        action='append',
+        default=[],
+        help='rule to exclude',
     )
     parser.add_argument(
         'attr_paths',
