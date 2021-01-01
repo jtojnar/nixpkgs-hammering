@@ -19,12 +19,12 @@ def nix_eval(expr: str) -> str:
     )
 
 
-def nix_eval_json(expr: str):
+def nix_eval_json(expr: str, as_string=False):
     result = subprocess.check_output(
         ['nix-instantiate', '--strict', '--json', '--eval', '-E', expr],
         encoding='utf-8',
     )
-    return json.loads(result)
+    return result if as_string else json.loads(result)
 
 
 def bold(msg):
@@ -162,15 +162,18 @@ def main(args):
     if args.show_trace:
         print('Nix expression:', all_messages_nix, file=sys.stderr)
 
-    all_messages = nix_eval_json(all_messages_nix)
+    all_messages = nix_eval_json(all_messages_nix, args.json)
 
-    for attr, messages in all_messages.items():
-        print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
-        if len(messages) > 0:
-            print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
-        else:
-            print(green('No issues found.'), file=sys.stderr)
-        print(file=sys.stderr)
+    if args.json:
+        print(all_messages)
+    else:
+        for attr, messages in all_messages.items():
+            print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
+            if len(messages) > 0:
+                print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
+            else:
+                print(green('No issues found.'), file=sys.stderr)
+            print(file=sys.stderr)
 
 
 if __name__ == '__main__':
@@ -193,6 +196,12 @@ if __name__ == '__main__':
         dest='show_trace',
         action='store_true',
         help='show trace when error occurs',
+    )
+    parser.add_argument(
+        '--json',
+        dest='json',
+        action='store_true',
+        help='Output results as JSON',
     )
     parser.add_argument(
         '-e',
