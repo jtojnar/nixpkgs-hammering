@@ -15,9 +15,15 @@
   outputs = { self, flake-compat, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
   in {
-    packages.nixpkgs-hammer = pkgs.runCommand "nixpkgs-hammer" { } ''
+    packages.nixpkgs-hammer = pkgs.runCommand "nixpkgs-hammer" {
+      buildInputs = with pkgs; [
+        python3
+      ];
+    } ''
       install -D ${./tools/nixpkgs-hammer} $out/bin/$name
       patchShebangs $out/bin/$name
+      substituteInPlace $out/bin/$name \
+        --replace "NIX_INSTANTIATE_PATH = 'nix-instantiate'" "NIX_INSTANTIATE_PATH = '${pkgs.nix}/bin/nix-instantiate'"
       ln -s ${./overlays} $out/overlays
       ln -s ${./lib} $out/lib
     '';

@@ -8,20 +8,23 @@ import sys
 import textwrap
 
 
+NIX_INSTANTIATE_PATH = 'nix-instantiate'
+
+
 def escape_nix_string(val: str) -> str:
     return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
 def nix_eval(expr: str) -> str:
     return subprocess.check_output(
-        ['nix-instantiate', '--eval', '-E', expr],
+        [NIX_INSTANTIATE_PATH, '--eval', '-E', expr],
         encoding='utf-8',
     )
 
 
 def nix_eval_json(expr: str, as_string=False):
     result = subprocess.check_output(
-        ['nix-instantiate', '--strict', '--json', '--eval', '-E', expr],
+        [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr],
         encoding='utf-8',
     )
     return result if as_string else json.loads(result)
