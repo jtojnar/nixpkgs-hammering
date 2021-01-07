@@ -15,4 +15,4 @@ jobs:
       uses: cachix/install-nix-action@v12
 
     - name: Run tests
-      run: ./run-tests.py
+      run: nix-shell --run ./run-tests.py

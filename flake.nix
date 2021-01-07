@@ -33,5 +33,12 @@
     apps.nixpkgs-hammer = utils.lib.mkApp { drv = self.packages.${system}.nixpkgs-hammer; };
 
     defaultApp = self.apps.${system}.nixpkgs-hammer;
+
+    devShell = pkgs.mkShell {
+      buildInputs = with pkgs; [
+        python3
+        nix
+      ];
+    };
   });
 }
