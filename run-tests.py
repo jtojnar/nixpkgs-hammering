@@ -194,6 +194,7 @@ class TestSuite(unittest.TestSuite):
                 'lgpl2',
                 'lgpl21',
                 'lgpl3',
+                'lgpl3-python',
             ],
             [
                 'single-nonmatching-license',

@@ -6,7 +6,7 @@
 final: prev:
 let
   inherit (prev) lib;
-  inherit (import ../lib { inherit lib; }) checkMkDerivationFor;
+  inherit (import ../lib { inherit lib; }) checkFor;
 
   licenses = [
     "agpl3"
@@ -37,4 +37,4 @@ let
     );
 
 in
-  checkMkDerivationFor checkDerivation attrs final prev
+  checkFor checkDerivation attrs final prev

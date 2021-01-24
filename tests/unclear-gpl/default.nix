@@ -13,6 +13,7 @@
   lgpl2 = pkgs.callPackage ./lgpl2.nix { };
   lgpl21 = pkgs.callPackage ./lgpl21.nix { };
   lgpl3 = pkgs.callPackage ./lgpl3.nix { };
+  lgpl3-python = pkgs.python3.pkgs.callPackage ./lgpl3-python.nix { };
 
   # negative cases
   single-nonmatching-license = pkgs.callPackage ./single-nonmatching-license.nix { };
