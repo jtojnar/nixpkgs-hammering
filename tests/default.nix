@@ -9,6 +9,7 @@
   explicit-phases = pkgs.callPackage ./explicit-phases { };
   fixup-phase = pkgs.callPackage ./fixup-phase { };
   meson-cmake = pkgs.callPackage ./meson-cmake { };
+  missing-patch-comment = pkgs.callPackage ./missing-patch-comment { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
   patch-phase = pkgs.callPackage ./patch-phase { };
   python-explicit-check-phase = pkgs.python3.pkgs.callPackage ./python-explicit-check-phase { };

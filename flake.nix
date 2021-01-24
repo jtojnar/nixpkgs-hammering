@@ -7,26 +7,50 @@
       flake = false;
     };
 
+    naersk = {
+      url = "github:nmattia/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-compat, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
+  outputs = { self, flake-compat, naersk, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
-  in {
-    packages.nixpkgs-hammer = pkgs.runCommand "nixpkgs-hammer" {
-      buildInputs = with pkgs; [
-        python3
-      ];
-    } ''
-      install -D ${./tools/nixpkgs-hammer} $out/bin/$name
-      patchShebangs $out/bin/$name
-      substituteInPlace $out/bin/$name \
-        --replace "NIX_INSTANTIATE_PATH = 'nix-instantiate'" "NIX_INSTANTIATE_PATH = '${pkgs.nix}/bin/nix-instantiate'"
-      ln -s ${./overlays} $out/overlays
-      ln -s ${./lib} $out/lib
-    '';
+    naersk-lib = naersk.lib."${system}";
+  in rec {
+
+    packages.ast-checks = naersk-lib.buildPackage {
+      name = "ast-checks";
+      root = ./ast-checks;
+    };
+
+    packages.nixpkgs-hammer =
+      let
+        # Find all of the binaries installed by ast-checks.
+        ast-check-names =
+          let
+            cargo = builtins.fromTOML (builtins.readFile ./ast-checks/Cargo.toml);
+          in
+            map (bin: bin.name) cargo.bin;
+      in
+        pkgs.runCommand "nixpkgs-hammer" {
+          buildInputs = with pkgs; [
+            python3
+            makeWrapper
+          ];
+        } ''
+          install -D ${./tools/nixpkgs-hammer} $out/bin/$name
+          patchShebangs $out/bin/$name
+
+          wrapProgram "$out/bin/$name" \
+              --prefix PATH ":" ${pkgs.lib.makeBinPath [ pkgs.nixUnstable packages.ast-checks ]} \
+              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" ast-check-names}
+          ln -s ${./overlays} $out/overlays
+          ln -s ${./lib} $out/lib
+        '';
 
     defaultPackage = self.packages.${system}.nixpkgs-hammer;
 
@@ -37,7 +61,8 @@
     devShell = pkgs.mkShell {
       buildInputs = with pkgs; [
         python3
-        nix
+        rustc
+        cargo
       ];
     };
   });

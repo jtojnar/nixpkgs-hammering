@@ -1,14 +1,62 @@
 #!/usr/bin/env python3
 
+import os
 from pathlib import Path
 import argparse
 import json
 import subprocess
 import sys
 import textwrap
+from typing import Dict, List
+from collections import defaultdict
 
 
-NIX_INSTANTIATE_PATH = 'nix-instantiate'
+def get_ast_check_programs():
+    # Each rule that is implemented as an AST check rather than an overlay
+    # is installed onto our PATH, and the names of the rules put into this
+    # environment variable.
+    return set(os.environ['AST_CHECK_NAMES'].split(':'))
+
+
+def attr_to_file_path(attr: str, nix_file: str) -> str:
+    env = dict(os.environ)
+    env['EDITOR'] = 'echo'
+
+    proc = subprocess.run(
+        ['nix', 'edit', '--experimental-features', 'nix-command', '-f', nix_file, attr],
+        env=env,
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+    return proc.stdout.strip()
+
+
+def ast_checks(nix_file: str, attrs: List[str], excluded_rules: List[str]) -> Dict[str, List]:
+    file_to_attr = defaultdict(list)
+    for attr in attrs:
+        file = attr_to_file_path(attr, nix_file)
+        file_to_attr[file].append(attr)
+
+    rules = get_ast_check_programs() - set(excluded_rules)
+
+    result = defaultdict(list)
+    for rule in rules:
+        cmd = [rule] + list(file_to_attr.keys())
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, check=True, text=True)
+        output = json.loads(proc.stdout)
+        for file, report in output.items():
+            for attr in file_to_attr[file]:
+                result[attr].extend(report)
+    return dict(result)
+
+
+def concatenate_messages(*message_sources):
+    result = defaultdict(list)
+    for m in message_sources:
+        for attr, report in m.items():
+            result[attr].extend(report)
+    return result
 
 
 def escape_nix_string(val: str) -> str:
@@ -16,7 +64,7 @@ def escape_nix_string(val: str) -> str:
 
 
 def nix_eval_json(expr: str, show_trace: bool=False):
-    args = [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr]
+    args = ['nix-instantiate', '--strict', '--json', '--eval', '-E', expr]
 
     if show_trace:
         args.append('--show-trace')
@@ -155,7 +203,9 @@ def main(args):
     if args.show_trace:
         print('Nix expression:', all_messages_nix, file=sys.stderr)
 
-    all_messages = nix_eval_json(all_messages_nix, args.show_trace)
+    all_overlay_messages = nix_eval_json(all_messages_nix, args.show_trace)
+    all_ast_check_messages = ast_checks(args.nix_file, args.attr_paths, args.excluded_rules)
+    all_messages = concatenate_messages(all_overlay_messages, all_ast_check_messages)
 
     if args.json:
         print(json.dumps(all_messages))
@@ -171,6 +221,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
+        prog='nixpkgs-hammer',
         description='check package expressions for common mistakes',
     )
     parser.add_argument(

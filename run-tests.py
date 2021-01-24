@@ -12,7 +12,7 @@ def make_test_variant(rule, variant=None, should_match=True):
         attr_path=f'{rule}.{variant}' if variant is not None else rule
         test_build = subprocess.run(
             [
-                os.path.join(script_dir, 'tools/nixpkgs-hammer'),
+                'nixpkgs-hammer',
                 '-f', './tests',
                 attr_path
             ],
@@ -100,6 +100,18 @@ class TestSuite(unittest.TestSuite):
 
         yield make_test_rule(
             'meson-cmake'
+        )
+
+        yield make_test_rule(
+            'missing-patch-comment',
+            [
+                'missing-comment',
+            ],
+            [
+                'general-comment',
+                'comment-above',
+                'comment-within',
+            ]
         )
 
         yield make_test_rule(
