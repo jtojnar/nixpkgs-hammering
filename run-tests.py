@@ -144,6 +144,19 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'python-include-tests',
+            [
+                'no-tests-no-import-checks',
+                'tests-disabled-no-import-checks',
+            ],
+            [
+                'pytest-check-hook',
+                'explicit-check-phase',
+                'has-imports-check'
+            ]
+        )
+
+        yield make_test_rule(
             'unnecessary-parallel-building',
             [
                 'cmake',

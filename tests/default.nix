@@ -12,6 +12,7 @@
   patch-phase = pkgs.callPackage ./patch-phase { };
   python-explicit-check-phase = pkgs.python3.pkgs.callPackage ./python-explicit-check-phase { };
   python-imports-check-typo = pkgs.python3.pkgs.callPackage ./python-imports-check-typo { };
+  python-include-tests = pkgs.python3.pkgs.callPackage ./python-include-tests { };
   unclear-gpl = pkgs.callPackage ./unclear-gpl { };
   unnecessary-parallel-building = pkgs.callPackage ./unnecessary-parallel-building { };
 }
