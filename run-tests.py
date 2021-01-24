@@ -121,6 +121,17 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'python-explicit-check-phase',
+            [
+                'redundant-pytest',
+            ],
+            [
+                'nonredundant-pytest',
+            ]
+        )
+
+
+        yield make_test_rule(
             'unnecessary-parallel-building',
             [
                 'cmake',

@@ -10,6 +10,7 @@
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
   patch-phase = pkgs.callPackage ./patch-phase { };
+  python-explicit-check-phase = pkgs.python3.pkgs.callPackage ./python-explicit-check-phase { };
   unclear-gpl = pkgs.callPackage ./unclear-gpl { };
   unnecessary-parallel-building = pkgs.callPackage ./unnecessary-parallel-building { };
 }
