@@ -130,6 +130,18 @@ class TestSuite(unittest.TestSuite):
             ]
         )
 
+        yield make_test_rule(
+            'python-imports-check-typo',
+            [
+                'pythonImportTests',
+                'pythonImportCheck',
+                'pythonImportsTest',
+                'pythonCheckImports',
+            ],
+            [
+                'pythonImportsCheck',
+            ]
+        )
 
         yield make_test_rule(
             'unnecessary-parallel-building',
