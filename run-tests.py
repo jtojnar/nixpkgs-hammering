@@ -161,6 +161,17 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'python-inconsistent-interpreters',
+            [
+                'mixed-1',
+                'mixed-2',
+            ],
+            [
+                'normal',
+            ]
+        )
+
+        yield make_test_rule(
             'unnecessary-parallel-building',
             [
                 'cmake',
