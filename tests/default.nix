@@ -5,6 +5,7 @@
 {
   attribute-ordering = pkgs.callPackage ./attribute-ordering { };
   build-tools-in-build-inputs = pkgs.recurseIntoAttrs (pkgs.callPackage ./build-tools-in-build-inputs { });
+  duplicate-check-inputs = pkgs.python3.pkgs.callPackage ./duplicate-check-inputs { };
   explicit-phases = pkgs.callPackage ./explicit-phases { };
   fixup-phase = pkgs.callPackage ./fixup-phase { };
   meson-cmake = pkgs.callPackage ./meson-cmake { };

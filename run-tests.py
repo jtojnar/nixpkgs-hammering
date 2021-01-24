@@ -81,6 +81,10 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'duplicate-check-inputs',
+        )
+
+        yield make_test_rule(
             'explicit-phases',
             [
                 'configure',
