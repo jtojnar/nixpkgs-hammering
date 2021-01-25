@@ -14,6 +14,41 @@ rec {
       in
         lib.toUpper head + tail;
 
+  # Attaches reports to a package’s attribute set.
+  addReports =
+    originalDrv:
+    reports:
+
+    lib.recursiveUpdate originalDrv {
+      __nixpkgs-hammering-state = {
+        reports = originalDrv.__nixpkgs-hammering-state.reports or [] ++ reports;
+      };
+    };
+
+  # Creates a function based on the original one, that, when called on
+  # one of the requested packages, runs a check on the arguments passed to it
+  # and then returns the original result enriched with the reports.
+  wrapFunctionWithChecks =
+    originalFunction:
+    namePositions:
+    check:
+
+    args:
+
+    let
+      originalDrv = originalFunction args;
+      namePosition =
+        let
+          pnamePosition = builtins.unsafeGetAttrPos "pname" args;
+        in
+          if pnamePosition != null then pnamePosition else builtins.unsafeGetAttrPos "name" args;
+    in
+      if builtins.elem namePosition namePositions
+      then
+        addReports originalDrv (lib.filter ({ cond, ... }: cond) (check args))
+      else
+        originalDrv;
+
   # Creates an overlay that replaces stdenv.mkDerivation with a function that,
   # for packages with locations of name attribute matching one of the namePositions,
   # checks the attribute set passed as argument to mkDerivation.
@@ -29,24 +64,7 @@ rec {
 
     {
       stdenv = prev.stdenv // {
-        mkDerivation = drv:
-          let
-            originalDrv = prev.stdenv.mkDerivation drv;
-            namePosition =
-              let
-                pnamePosition = builtins.unsafeGetAttrPos "pname" drv;
-              in
-                if pnamePosition != null then pnamePosition else builtins.unsafeGetAttrPos "name" drv;
-          in
-            if builtins.elem namePosition namePositions
-            then
-              lib.recursiveUpdate originalDrv {
-                __nixpkgs-hammering-state = {
-                  reports = originalDrv.__nixpkgs-hammering-state.reports or [] ++ lib.filter ({ cond, ... }: cond) (check drv);
-                };
-              }
-            else
-              originalDrv;
+        mkDerivation = wrapFunctionWithChecks prev.stdenv.mkDerivation namePositions check;
       };
     };
 }
