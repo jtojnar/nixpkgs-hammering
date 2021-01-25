@@ -27,11 +27,11 @@ let
         builtins.listToAttrs
       ];
 
-  checkDerivation = drv:
+  checkDerivation = drvArgs: drv:
     let
-      getAttrLine = attr: (builtins.unsafeGetAttrPos attr drv).line;
+      getAttrLine = attr: (builtins.unsafeGetAttrPos attr drvArgs).line;
 
-      drvAttrs = builtins.sort (a: b: getAttrLine a < getAttrLine b) (builtins.attrNames drv);
+      drvAttrs = builtins.sort (a: b: getAttrLine a < getAttrLine b) (builtins.attrNames drvArgs);
 
       knownDrvAttrs = builtins.filter (attr: preferredOrdering ? "${attr}") drvAttrs;
 
@@ -48,8 +48,8 @@ let
             The ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}, including the "}attribute “${fst}” should preferably come before ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}’ "}“${snd}” attribute in the expression.
           '';
           locations = [
-            (builtins.unsafeGetAttrPos fst drv)
-            (builtins.unsafeGetAttrPos snd drv)
+            (builtins.unsafeGetAttrPos fst drvArgs)
+            (builtins.unsafeGetAttrPos snd drvArgs)
           ];
         }
       );

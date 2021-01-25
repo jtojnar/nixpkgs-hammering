@@ -15,16 +15,16 @@ let
     "pkg-config"
   ];
 
-  checkDerivation = drv:
+  checkDerivation = drvArgs: drv:
     (map
       (tool: {
         name = "build-tools-in-build-inputs";
-        cond = lib.elem prev.${tool} (drv.buildInputs or [ ]);
+        cond = lib.elem prev.${tool} (drvArgs.buildInputs or [ ]);
         msg = ''
           ${tool} is a build tool so it likely goes to `nativeBuildInputs`, not `buildInputs`.
         '';
         locations = [
-          (builtins.unsafeGetAttrPos "buildInputs" drv)
+          (builtins.unsafeGetAttrPos "buildInputs" drvArgs)
         ];
       })
       buildTools

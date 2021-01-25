@@ -15,16 +15,16 @@ let
     "install"
   ];
 
-  checkDerivation = drv:
+  checkDerivation = drvArgs: drv:
     (map
       (phase: {
         name = "explicit-phases";
-        cond = drv ? "${phase}Phase";
+        cond = drvArgs ? "${phase}Phase";
         msg = ''
           It is a good idea to avoid overriding `${phase}Phase` when possible.
         '';
         locations = [
-          (builtins.unsafeGetAttrPos "${phase}Phase" drv)
+          (builtins.unsafeGetAttrPos "${phase}Phase" drvArgs)
         ];
       })
       phases

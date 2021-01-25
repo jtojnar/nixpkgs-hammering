@@ -8,15 +8,15 @@ let
   inherit (prev) lib;
   inherit (import ../lib { inherit lib; }) checkMkDerivationFor;
 
-  checkDerivation = drv:
+  checkDerivation = drvArgs: drv:
     lib.singleton {
       name = "patch-phase";
-      cond = drv ? patchPhase;
+      cond = drvArgs ? patchPhase;
       msg = ''
         `patchPhase` should not be overridden, use `postPatch` instead.
       '';
       locations = [
-        (builtins.unsafeGetAttrPos "patchPhase" drv)
+        (builtins.unsafeGetAttrPos "patchPhase" drvArgs)
       ];
     };
 

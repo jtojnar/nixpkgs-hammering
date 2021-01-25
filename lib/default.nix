@@ -45,7 +45,7 @@ rec {
     in
       if builtins.elem namePosition namePositions
       then
-        addReports originalDrv (lib.filter ({ cond, ... }: cond) (check args))
+        addReports originalDrv (lib.filter ({ cond, ... }: cond) (check args originalDrv))
       else
         originalDrv;
 
