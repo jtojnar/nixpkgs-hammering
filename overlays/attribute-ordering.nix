@@ -6,7 +6,7 @@
 final: prev:
 let
   inherit (prev) lib;
-  inherit (import ../lib { inherit lib; }) checkMkDerivationFor;
+  inherit (import ../lib { inherit lib; }) checkFor;
 
   preferredOrdering =
     let
@@ -55,4 +55,4 @@ let
       );
 
 in
-  checkMkDerivationFor checkDerivation attrs final prev
+  checkFor checkDerivation attrs final prev
