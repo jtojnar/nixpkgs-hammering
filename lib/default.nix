@@ -21,7 +21,7 @@ rec {
 
     lib.recursiveUpdate originalDrv {
       __nixpkgs-hammering-state = {
-        reports = originalDrv.__nixpkgs-hammering-state.reports or [] ++ reports;
+        reports = lib.unique (originalDrv.__nixpkgs-hammering-state.reports or [] ++ reports);
       };
     };
 
