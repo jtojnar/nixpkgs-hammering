@@ -4,15 +4,7 @@
 rec {
   attrByPathString = attrPath: lib.getAttrFromPath (lib.splitString "." attrPath);
 
-  capitalize = str:
-    if builtins.stringLength str == 0 then
-      str
-    else
-      let
-        head = builtins.substring 0 1 str;
-        tail = builtins.substring 1 (builtins.stringLength str - 1) str;
-      in
-        lib.toUpper head + tail;
+  capitalize = lib.stringAsChars lib.toUpper;
 
   # Attaches reports to a package’s attribute set.
   addReports =
