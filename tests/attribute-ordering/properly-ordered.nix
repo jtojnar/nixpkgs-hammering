@@ -1,4 +1,5 @@
-{ stdenv 
+{ stdenv
+, lib
 , fetchurl
 }:
 
@@ -79,7 +80,7 @@ stdenv.mkDerivation rec {
 
   passthru = { };
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "";
     license = licenses.mit;
     platforms = platforms.unix;

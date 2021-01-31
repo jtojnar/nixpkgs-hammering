@@ -1,4 +1,5 @@
 { stdenv
+, lib
 }:
 
 stdenv.mkDerivation {
@@ -6,5 +7,5 @@ stdenv.mkDerivation {
 
   src = ../fixtures/make;
 
-  meta.license = stdenv.lib.licenses.asl20;
+  meta.license = lib.licenses.asl20;
 }

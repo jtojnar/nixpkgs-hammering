@@ -5,6 +5,7 @@ We start with general package information and sources that change every update, 
 ## Examples
 ```nix
 { stdenv 
+, lib
 , fetchurl
 }:
 
@@ -102,7 +103,7 @@ stdenv.mkDerivation rec {
   passthru = {
   };
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "";
     longDescription = ''
     '';
