@@ -110,7 +110,7 @@ def main(args):
         name_position = textwrap.dedent(
             f'''
             let
-                drv = (import {args.nix_file} {{ }}).{attr} or {{ }};
+                drv = cleanPkgs.{attr} or {{ }};
             in
                 getDrvSourceLocation drv
             '''
@@ -142,6 +142,7 @@ def main(args):
             inherit (import {lib_dir / 'standalone.nix'}) getDrvSourceLocation;
             builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
+            cleanPkgs = import {args.nix_file} {{ }};
             namePositions = builtins.filter (p: p != null) {indent(name_positions_nix, 2 + 1).strip()};
 
             pkgs = import {args.nix_file} {{
