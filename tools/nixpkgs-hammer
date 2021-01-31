@@ -118,7 +118,7 @@ def main(args):
         name_position = nix_eval(textwrap.dedent(
             f'''
             let
-                drv = (import {args.nix_file} {{ }}).{attr};
+                drv = (import {args.nix_file} {{ }}).{attr} or {{ }};
                 pname = builtins.unsafeGetAttrPos "pname" drv;
             in
                 if pname != null then
@@ -153,7 +153,7 @@ def main(args):
         let
             builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
-            namePositions = {indent(name_positions_nix, 2 + 1).strip()};
+            namePositions = builtins.filter (p: p != null) {indent(name_positions_nix, 2 + 1).strip()};
 
             pkgs = import {args.nix_file} {{
                 overlays = {indent(overlays_nix, 2 + 2).strip()};
