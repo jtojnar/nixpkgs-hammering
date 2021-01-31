@@ -15,12 +15,12 @@ def escape_nix_string(val: str) -> str:
     return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
-def nix_eval_json(expr: str, as_string=False):
+def nix_eval_json(expr: str):
     result = subprocess.check_output(
         [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr],
         encoding='utf-8',
     )
-    return result if as_string else json.loads(result)
+    return json.loads(result)
 
 
 def bold(msg):
@@ -156,10 +156,10 @@ def main(args):
     if args.show_trace:
         print('Nix expression:', all_messages_nix, file=sys.stderr)
 
-    all_messages = nix_eval_json(all_messages_nix, args.json)
+    all_messages = nix_eval_json(all_messages_nix)
 
     if args.json:
-        print(all_messages)
+        print(json.dumps(all_messages))
     else:
         for attr, messages in all_messages.items():
             print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
