@@ -4,6 +4,8 @@
 rec {
   attrByPathString = attrPath: lib.getAttrFromPath (lib.splitString "." attrPath);
 
+  inherit (import ./standalone.nix) getDrvSourceLocation;
+
   capitalize = str:
     if builtins.stringLength str == 0 then
       str
@@ -40,11 +42,7 @@ rec {
 
     let
       originalDrv = originalFunction args;
-      namePosition =
-        let
-          pnamePosition = builtins.unsafeGetAttrPos "pname" args;
-        in
-          if pnamePosition != null then pnamePosition else builtins.unsafeGetAttrPos "name" args;
+      namePosition = getDrvSourceLocation args;
     in
       if builtins.elem namePosition namePositions
       then
