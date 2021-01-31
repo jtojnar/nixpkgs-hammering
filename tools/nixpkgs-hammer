@@ -15,9 +15,14 @@ def escape_nix_string(val: str) -> str:
     return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
-def nix_eval_json(expr: str):
+def nix_eval_json(expr: str, show_trace: bool=False):
+    args = [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr]
+
+    if show_trace:
+        args.append('--show-trace')
+
     result = subprocess.check_output(
-        [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr],
+        args,
         encoding='utf-8',
     )
     return json.loads(result)
@@ -80,13 +85,6 @@ def main(args):
     script_dir = Path(__file__).parent
     overlay_generators_path = (script_dir.parent / 'overlays').absolute()
     lib_dir = (script_dir.parent / 'lib').absolute()
-
-    build_args = [
-        args.nix_file,
-    ]
-
-    if args.show_trace:
-        build_args.append('--show-trace')
 
     attrs_nix = []
     attr_messages = []
@@ -156,7 +154,7 @@ def main(args):
     if args.show_trace:
         print('Nix expression:', all_messages_nix, file=sys.stderr)
 
-    all_messages = nix_eval_json(all_messages_nix)
+    all_messages = nix_eval_json(all_messages_nix, args.show_trace)
 
     if args.json:
         print(json.dumps(all_messages))
