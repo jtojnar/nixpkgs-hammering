@@ -15,13 +15,6 @@ def escape_nix_string(val: str) -> str:
     return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
-def nix_eval(expr: str) -> str:
-    return subprocess.check_output(
-        [NIX_INSTANTIATE_PATH, '--eval', '-E', expr],
-        encoding='utf-8',
-    )
-
-
 def nix_eval_json(expr: str, as_string=False):
     result = subprocess.check_output(
         [NIX_INSTANTIATE_PATH, '--strict', '--json', '--eval', '-E', expr],
@@ -115,7 +108,7 @@ def main(args):
             '''
         ))
 
-        name_position = nix_eval(textwrap.dedent(
+        name_position = textwrap.dedent(
             f'''
             let
                 drv = (import {args.nix_file} {{ }}).{attr} or {{ }};
@@ -126,7 +119,7 @@ def main(args):
                 else
                     builtins.unsafeGetAttrPos "name" drv
             '''
-        ))
+        )
         name_positions.append('(' + name_position.strip() + ')')
 
     # Our overlays need to know the built attributes so that they can check only them.
