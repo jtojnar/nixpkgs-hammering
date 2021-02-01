@@ -46,7 +46,12 @@
           patchShebangs $out/bin/$name
 
           wrapProgram "$out/bin/$name" \
-              --prefix PATH ":" ${pkgs.lib.makeBinPath [ pkgs.nixUnstable packages.ast-checks ]} \
+              --prefix PATH ":" ${pkgs.lib.makeBinPath [
+                # For echo
+                pkgs.coreutils
+                pkgs.nixUnstable
+                packages.ast-checks
+              ]} \
               --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" ast-check-names}
           ln -s ${./overlays} $out/overlays
           ln -s ${./lib} $out/lib
