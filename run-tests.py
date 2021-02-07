@@ -99,6 +99,18 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'license-missing',
+            [
+                'no-license',
+                'empty-license',
+                'no-meta'
+            ],
+            [
+                'have-license'
+            ]
+        )        
+
+        yield make_test_rule(
             'meson-cmake'
         )
 

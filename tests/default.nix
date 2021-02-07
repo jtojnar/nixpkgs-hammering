@@ -8,6 +8,7 @@
   duplicate-check-inputs = pkgs.python3.pkgs.callPackage ./duplicate-check-inputs { };
   explicit-phases = pkgs.callPackage ./explicit-phases { };
   fixup-phase = pkgs.callPackage ./fixup-phase { };
+  license-missing = pkgs.callPackage ./license-missing { };
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-patch-comment = pkgs.callPackage ./missing-patch-comment { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
