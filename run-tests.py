@@ -108,7 +108,19 @@ class TestSuite(unittest.TestSuite):
             [
                 'have-license'
             ]
-        )        
+        )
+
+        yield make_test_rule(
+            'maintainers-missing',
+            [
+                'no-maintainers',
+                'empty-maintainers',
+                'no-meta'
+            ],
+            [
+                'have-maintainers',
+            ]
+        )
 
         yield make_test_rule(
             'meson-cmake'
