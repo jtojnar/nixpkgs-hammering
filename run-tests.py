@@ -190,6 +190,16 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'no-uri-literals',
+            [
+                'uri-literal',
+            ],
+            [
+                'string',
+            ]
+        )
+
+        yield make_test_rule(
             'patch-phase'
         )
 
