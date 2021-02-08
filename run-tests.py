@@ -180,6 +180,16 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'no-flags-spaces',
+            [
+                'bad',
+            ],
+            [
+                'okay',
+            ],
+        )
+
+        yield make_test_rule(
             'patch-phase'
         )
 
