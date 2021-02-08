@@ -1,47 +1,23 @@
 use codespan::{FileId, Files};
+use nixpkgs_hammering_ast_checks::analysis::*;
 use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within};
 use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation};
 use rnix::types::*;
-use std::{collections::HashMap, env, error::Error, fs};
+use std::{error::Error, env};
 use nixpkgs_hammering_ast_checks::tree_utils::walk_keyvalues_filter_key;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().skip(1).collect();
-    let mut report = HashMap::new();
-
-    let mut files = Files::new();
-    for filename in args {
-        let file_id = files.add(filename.clone(), fs::read_to_string(&filename)?);
-        report.insert(filename.clone(), analyze_single_file(&files, file_id)?);
-    }
-
-    println!("{}", serde_json::to_string(&report)?);
+    println!("{}", analyze_files(args, analyze_single_file)?);
     Ok(())
 }
 
 fn analyze_single_file(
     files: &Files<String>,
     file_id: FileId,
-) -> Result<Vec<NixpkgsHammerMessage>, Box<dyn Error>> {
-    let ast = rnix::parse(files.source(file_id))
-        .as_result()
-        .map_err(|_| {
-            format!(
-                "Unable to parse {} as a nix file",
-                files
-                    .name(file_id)
-                    .to_str()
-                    .unwrap_or("unprintable file, encoding error")
-            )
-        })?;
-    let root = ast.root().inner().ok_or(format!(
-        "No elements in the AST in path {}",
-        files
-            .name(file_id)
-            .to_str()
-            .unwrap_or("unprintable file, encoding error")
-    ))?;
-    let mut report: Vec<NixpkgsHammerMessage> = vec![];
+) -> Result<Report, Box<dyn Error>> {
+    let root = find_root(files, file_id)?;
+    let mut report: Report = vec![];
 
     // Find all “patches” attrset attributes, that
     // *do not* have a comment directly above them.
@@ -64,8 +40,8 @@ fn process_patch_list(
     kv: KeyValue,
     files: &Files<String>,
     file_id: FileId,
-) -> Result<Vec<NixpkgsHammerMessage>, Box<dyn Error>> {
-    let mut report: Vec<NixpkgsHammerMessage> = vec![];
+) -> Result<Report, Box<dyn Error>> {
+    let mut report: Report = vec![];
 
     match kv.value().and_then(List::cast) {
         Some(value) => {
@@ -78,44 +54,24 @@ fn process_patch_list(
 
                 if !(has_comment_above || has_comment_within) {
                     let start = item.text_range().start().to_usize() as u32;
-                    let loc = files.location(file_id, start)?;
 
                     report.push(NixpkgsHammerMessage {
-                    cond: true,
-                    msg: "Please add a comment on the line above, explaining the purpose of this patch.",
-                    name: "missing-patch-comment",
-                    locations: vec![SourceLocation {
-                        file: files
-                            .name(file_id)
-                            .to_str()
-                            .ok_or("encoding error")?
-                            .to_string(),
-                        // Convert 0-based indexing to 1-based.
-                        column: loc.column.to_usize() + 1,
-                        line: loc.line.to_usize() + 1,
-                    }],
-                });
+                        cond: true,
+                        msg: "Please add a comment on the line above, explaining the purpose of this patch.",
+                        name: "missing-patch-comment",
+                        locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
+                    });
                 }
             }
         }
         None => {
             let start = kv.node().text_range().start().to_usize() as u32;
-            let loc = files.location(file_id, start)?;
 
             report.push(NixpkgsHammerMessage {
                 cond: true,
                 msg: "`patches` should be a list.",
                 name: "missing-patch-comment",
-                locations: vec![SourceLocation {
-                    file: files
-                        .name(file_id)
-                        .to_str()
-                        .ok_or("encoding error")?
-                        .to_string(),
-                    // Convert 0-based indexing to 1-based.
-                    column: loc.column.to_usize() + 1,
-                    line: loc.line.to_usize() + 1,
-                }],
+                locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
             });
         }
     };
