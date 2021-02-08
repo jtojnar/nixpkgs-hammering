@@ -74,6 +74,19 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'attribute-typo',
+            [
+                'casing',
+                'deletion',
+                'insertion',
+                'transposition',
+            ],
+            [
+                'properly-ordered',
+            ]
+        )
+
+        yield make_test_rule(
             'build-tools-in-build-inputs',
             [
                 'cmake',

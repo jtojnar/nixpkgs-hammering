@@ -1,0 +1,1 @@
+nixpkgs-hammering contains a list of [known attributes](../lib/derivation-attributes.nix). When an attribute whose name is not listed there is passed to `stdenv.mkDerivation` but we know about a similarly named atribute, the check will suggest it as a likely typo.
