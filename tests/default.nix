@@ -14,6 +14,7 @@
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-patch-comment = pkgs.callPackage ./missing-patch-comment { };
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
+  no-flags-array = pkgs.callPackage ./no-flags-array { };
   patch-phase = pkgs.callPackage ./patch-phase { };
   python-explicit-check-phase = pkgs.python3.pkgs.callPackage ./python-explicit-check-phase { };
   python-imports-check-typo = pkgs.python3.pkgs.callPackage ./python-imports-check-typo { };

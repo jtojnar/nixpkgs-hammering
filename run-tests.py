@@ -173,6 +173,13 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'no-flags-array',
+            [
+                'make',
+            ],
+        )
+
+        yield make_test_rule(
             'patch-phase'
         )
 
