@@ -1,13 +1,9 @@
 use codespan::{FileId, Files};
-use comment_finders::{find_comment_above, find_comment_within};
-use common_structs::{NixpkgsHammerMessage, SourceLocation};
+use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within};
+use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation};
 use rnix::types::*;
 use std::{collections::HashMap, env, error::Error, fs};
-use tree_utils::walk_keyvalues_filter_key;
-
-mod comment_finders;
-mod common_structs;
-mod tree_utils;
+use nixpkgs_hammering_ast_checks::tree_utils::walk_keyvalues_filter_key;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().skip(1).collect();

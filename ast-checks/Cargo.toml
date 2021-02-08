@@ -1,12 +1,8 @@
 [package]
-name = "nixpkgs-hammer-ast-checks"
+name = "nixpkgs-hammering-ast-checks"
 version = "0.0.0"
 authors = ["Robert T. McGibbon <rmcgibbo@gmail.com>"]
 edition = "2018"
-
-[[bin]]
-name = "missing-patch-comment"
-path = "src/missing-patch-comment.rs"
 
 [dependencies]
 codespan = "0.11"

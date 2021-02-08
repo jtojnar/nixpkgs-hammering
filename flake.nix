@@ -29,12 +29,13 @@
 
     packages.nixpkgs-hammer =
       let
-        # Find all of the binaries installed by ast-checks.
-        ast-check-names =
-          let
-            cargo = builtins.fromTOML (builtins.readFile ./ast-checks/Cargo.toml);
-          in
-            map (bin: bin.name) cargo.bin;
+        # Find all of the binaries installed by ast-checks. Note, if this changes
+        # in the future to use wrappers or something else that pollute the bin/
+        # directory, this logic will have to grow.
+        ast-check-names = let
+          binContents = builtins.readDir "${packages.ast-checks}/bin";
+        in
+          pkgs.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
       in
         pkgs.runCommand "nixpkgs-hammer" {
           buildInputs = with pkgs; [
