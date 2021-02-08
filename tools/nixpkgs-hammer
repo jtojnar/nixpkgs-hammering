@@ -15,7 +15,12 @@ def get_ast_check_programs():
     # Each rule that is implemented as an AST check rather than an overlay
     # is installed onto our PATH, and the names of the rules put into this
     # environment variable.
-    return set(os.environ['AST_CHECK_NAMES'].split(':'))
+    ast_checks = os.environ.get('AST_CHECK_NAMES')
+
+    if ast_checks:
+        return set(ast_checks.split(':'))
+
+    return set()
 
 
 def attr_to_file_path(attr: str, nix_file: str) -> str:
