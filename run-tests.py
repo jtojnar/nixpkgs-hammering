@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import subprocess
 import textwrap
@@ -14,16 +15,17 @@ def make_test_variant(rule, variant=None, should_match=True):
             [
                 'nixpkgs-hammer',
                 '-f', './tests',
+                '--json',
                 attr_path
             ],
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
         )
 
         if test_build.returncode != 0:
             raise Exception('error building the test:' + test_build.stdout.decode('utf-8'))
         else:
-            matches = f'explanations/{rule}.md'.encode('utf-8') in test_build.stdout
+            report = json.loads(test_build.stdout)
+            matches = any(check['name'] == rule for check in report[attr_path])
             if should_match and not matches:
                 raise Exception('error matching the rule')
             elif not should_match and matches:
