@@ -45,7 +45,7 @@ let
           name = "attribute-ordering";
           cond = fstInfo.order > sndInfo.order;
           msg = ''
-            The ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}, including the "}attribute “${fst}” should preferably come before ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}’ "}“${snd}” attribute in the expression.
+            The ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}, including the "}attribute “${snd}” should preferably come before ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}’ "}“${fst}” attribute in the expression.
           '';
           locations = [
             (builtins.unsafeGetAttrPos fst drvArgs)
