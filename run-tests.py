@@ -66,6 +66,7 @@ class TestSuite(unittest.TestSuite):
                 'out-of-order',
             ],
             [
+                'inherited',
                 'properly-ordered',
             ]
         )

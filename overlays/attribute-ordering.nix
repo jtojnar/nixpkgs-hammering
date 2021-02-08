@@ -29,7 +29,8 @@ let
 
   checkDerivation = drvArgs: drv:
     let
-      getAttrLine = attr: (builtins.unsafeGetAttrPos attr drvArgs).line;
+      getAttrPos = attr: (builtins.unsafeGetAttrPos attr drvArgs);
+      getAttrLine = attr: (getAttrPos attr).line;
 
       drvAttrs = builtins.sort (a: b: getAttrLine a < getAttrLine b) (builtins.attrNames drvArgs);
 
@@ -43,7 +44,11 @@ let
           sndInfo = preferredOrdering.${snd};
         in {
           name = "attribute-ordering";
-          cond = fstInfo.order > sndInfo.order;
+          cond =
+            fstInfo.order > sndInfo.order &&
+            # Inherited attributes all have the same position so sort will keep them in alphabetical order returned by attrNames.
+            # This means we will not be able to detect if they are out of order and have to skip them.
+            getAttrPos fst != getAttrPos snd;
           msg = ''
             The ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}, including the "}attribute “${snd}” should preferably come before ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}’ "}“${fst}” attribute in the expression.
           '';
