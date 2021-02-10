@@ -32,7 +32,6 @@ impl SourceLocation {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NixpkgsHammerMessage {
-    pub cond: bool,
     pub locations: Vec<SourceLocation>,
     pub msg: &'static str,
     pub name: &'static str,

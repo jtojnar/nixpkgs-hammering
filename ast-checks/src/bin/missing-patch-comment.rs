@@ -56,7 +56,6 @@ fn process_patch_list(
                     let start = item.text_range().start().to_usize() as u32;
 
                     report.push(NixpkgsHammerMessage {
-                        cond: true,
                         msg: "Please add a comment on the line above, explaining the purpose of this patch.",
                         name: "missing-patch-comment",
                         locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
@@ -68,7 +67,6 @@ fn process_patch_list(
             let start = kv.node().text_range().start().to_usize() as u32;
 
             report.push(NixpkgsHammerMessage {
-                cond: true,
                 msg: "`patches` should be a list.",
                 name: "missing-patch-comment",
                 locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
