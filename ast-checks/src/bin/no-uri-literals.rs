@@ -23,9 +23,10 @@ fn analyze_single_file(
         let start = uri.text_range().start().to_usize() as u32;
 
         report.push(NixpkgsHammerMessage {
-            msg: "URI literals are deprecated.",
+            msg: "URI literals are deprecated.".to_string(),
             name: "no-uri-literals",
             locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
+            link: true,
         });
     }
 

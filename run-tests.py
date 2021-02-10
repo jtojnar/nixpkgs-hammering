@@ -280,6 +280,21 @@ class TestSuite(unittest.TestSuite):
             ]
         )
 
+        yield make_test_rule(
+            'unused-argument',
+            [
+                'unused-pattern',
+                'unused-pattern-var-as-key',
+                'unused-pattern-var-in-let-binding',
+            ],
+            [
+                'used-pattern',
+                'used-single',
+                'unused-single',
+            ]
+        )
+
+
 def load_tests(loader, tests, pattern):
     return TestSuite()
 

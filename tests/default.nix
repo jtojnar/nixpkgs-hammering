@@ -24,4 +24,5 @@
   python-inconsistent-interpreters = pkgs.python3.pkgs.callPackage ./python-inconsistent-interpreters { };
   unclear-gpl = pkgs.callPackage ./unclear-gpl { };
   unnecessary-parallel-building = pkgs.callPackage ./unnecessary-parallel-building { };
+  unused-argument = pkgs.callPackage ./unused-argument {};
 }

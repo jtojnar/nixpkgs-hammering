@@ -56,9 +56,10 @@ fn process_patch_list(
                     let start = item.text_range().start().to_usize() as u32;
 
                     report.push(NixpkgsHammerMessage {
-                        msg: "Please add a comment on the line above, explaining the purpose of this patch.",
+                        msg: "Please add a comment on the line above, explaining the purpose of this patch.".to_string(),
                         name: "missing-patch-comment",
                         locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
+                        link: true,
                     });
                 }
             }
@@ -67,9 +68,10 @@ fn process_patch_list(
             let start = kv.node().text_range().start().to_usize() as u32;
 
             report.push(NixpkgsHammerMessage {
-                msg: "`patches` should be a list.",
+                msg: "`patches` should be a list.".to_string(),
                 name: "missing-patch-comment",
                 locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
+                link: true,
             });
         }
     };
