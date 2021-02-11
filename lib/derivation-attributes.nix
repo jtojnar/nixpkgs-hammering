@@ -22,7 +22,7 @@
   }
 
   {
-    name = "build systemd configuration flags";
+    name = "build system configuration flags";
     values = [
       "cmakeFlags"
       "mesonFlags"
