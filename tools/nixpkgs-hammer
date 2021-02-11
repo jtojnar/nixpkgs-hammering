@@ -7,7 +7,7 @@ import json
 import subprocess
 import sys
 import textwrap
-from typing import Dict, List
+from typing import Dict, List, Optional
 from collections import defaultdict
 
 
@@ -23,7 +23,7 @@ def get_ast_check_programs():
     return set()
 
 
-def attr_to_file_path(attr: str, nix_file: str) -> str:
+def attr_to_file_path(attr: str, nix_file: str) -> Optional[str]:
     env = dict(os.environ)
     env['EDITOR'] = 'echo'
 
@@ -32,16 +32,20 @@ def attr_to_file_path(attr: str, nix_file: str) -> str:
         env=env,
         stdout=subprocess.PIPE,
         text=True,
-        check=True,
     )
-    return proc.stdout.strip()
+
+    if proc.returncode == 0:
+        return proc.stdout.strip()
+    else:
+        return None
 
 
 def ast_checks(nix_file: str, attrs: List[str], excluded_rules: List[str]) -> Dict[str, List]:
     file_to_attr = defaultdict(list)
     for attr in attrs:
         file = attr_to_file_path(attr, nix_file)
-        file_to_attr[file].append(attr)
+        if file:
+            file_to_attr[file].append(attr)
 
     rules = get_ast_check_programs() - set(excluded_rules)
 
@@ -148,24 +152,38 @@ def main(args):
 
         attr_messages.append(textwrap.dedent(
             f'''
-            "{attr}" = if pkgs.{attr} or null == null then
-                [ {{
-                    name = "AttrPathNotFound";
-                    msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
-                    severity = "error";
-                    link = false;
-                }} ]
-            else
-                pkgs.{attr}.__nixpkgs-hammering-state.reports or [];
+            "{attr}" =
+                let
+                    result = builtins.tryEval pkgs.{attr} or null;
+                in
+                    if !result.success then
+                        [ {{
+                            name = "EvalError";
+                            msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
+                            severity = "warning";
+                            link = false;
+                        }} ]
+                    else if result.value == null then
+                        [ {{
+                            name = "AttrPathNotFound";
+                            msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
+                            severity = "error";
+                            link = false;
+                        }} ]
+                    else
+                        result.value.__nixpkgs-hammering-state.reports or [];
             '''
         ))
 
         name_position = textwrap.dedent(
             f'''
             let
-                drv = cleanPkgs.{attr} or {{ }};
+                result = builtins.tryEval cleanPkgs.{attr} or {{ }};
             in
-                getDrvSourceLocation drv
+                if result.success then
+                    getDrvSourceLocation result.value
+                else
+                    null
             '''
         )
         name_positions.append('(' + name_position.strip() + ')')
