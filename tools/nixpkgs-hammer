@@ -73,7 +73,7 @@ def escape_nix_string(val: str) -> str:
 
 
 def nix_eval_json(expr: str, show_trace: bool=False):
-    args = ['nix-instantiate', '--strict', '--json', '--eval', '-E', expr]
+    args = ['nix-instantiate', '--strict', '--json', '--eval', '-']
 
     if show_trace:
         args.append('--show-trace')
@@ -81,6 +81,7 @@ def nix_eval_json(expr: str, show_trace: bool=False):
     result = subprocess.check_output(
         args,
         encoding='utf-8',
+        input=expr
     )
     return json.loads(result)
 
