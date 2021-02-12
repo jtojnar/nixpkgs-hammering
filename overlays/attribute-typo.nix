@@ -29,16 +29,27 @@ let
   getSuggestions = argName:
     let
       argNameLower = lib.toLower argName;
+      argLength = builtins.stringLength argName;
+      maxDistance =
+        if argLength <= 7 then
+          1
+        else if argLength <= 9 then
+          2
+        else
+          4;
     in
       if builtins.hasAttr argNameLower knownAttributeNamesLowerMapping then
         # Casing mismatch
         lib.singleton (builtins.getAttr argNameLower knownAttributeNamesLowerMapping)
+      else if argLength <= 5 then
+        # Too short, only casing typos are checked.
+        []
       else
         # Look for close matches
         lib.pipe knownAttributeNamesLower [
-          # Only use ones that are at most 4 edits away.
+          # Only use ones that are at most maxDistance edits away.
           # levenshteinAtMost is only fast for 2 or less so this is suboptimal but it will have to do for now.
-          (builtins.filter (levenshteinAtMost 4 argNameLower))
+          (builtins.filter (levenshteinAtMost maxDistance argNameLower))
           # Put strings with shorter distance first.
           (lib.sort (a: b: levenshtein a argNameLower < levenshtein b argNameLower))
           # Only take the first couple results.

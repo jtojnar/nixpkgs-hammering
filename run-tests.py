@@ -83,6 +83,7 @@ class TestSuite(unittest.TestSuite):
             ],
             [
                 'properly-ordered',
+                'unknown-short',
             ]
         )
 

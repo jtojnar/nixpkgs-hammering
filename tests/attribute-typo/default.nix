@@ -10,4 +10,5 @@
 
   # negative cases
   properly-ordered = pkgs.callPackage ../attribute-ordering/properly-ordered.nix { };
+  unknown-short = pkgs.callPackage ./unknown-short.nix { };
 }
