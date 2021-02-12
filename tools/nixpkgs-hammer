@@ -23,27 +23,11 @@ def get_ast_check_programs():
     return set()
 
 
-def attr_to_file_path(attr: str, nix_file: str) -> Optional[str]:
-    env = dict(os.environ)
-    env['EDITOR'] = 'echo'
 
-    proc = subprocess.run(
-        ['nix', 'edit', '--experimental-features', 'nix-command', '-f', nix_file, attr],
-        env=env,
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-
-    if proc.returncode == 0:
-        return proc.stdout.strip()
-    else:
-        return None
-
-
-def ast_checks(nix_file: str, attrs: List[str], excluded_rules: List[str]) -> Dict[str, List]:
+def ast_checks(attr_positions: Dict[str, str], excluded_rules: List[str]) -> Dict[str, List]:
     file_to_attr = defaultdict(list)
-    for attr in attrs:
-        file = attr_to_file_path(attr, nix_file)
+    for attr, file_colon_line in attr_positions.items():
+        file = file_colon_line.rsplit(":", 1)[0]
         if file:
             file_to_attr[file].append(attr)
 
@@ -154,25 +138,34 @@ def main(args):
         attr_messages.append(textwrap.dedent(
             f'''
             "{attr}" =
-                let
-                    result = builtins.tryEval pkgs.{attr} or null;
-                in
-                    if !result.success then
-                        [ {{
-                            name = "EvalError";
-                            msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
-                            severity = "warning";
-                            link = false;
-                        }} ]
-                    else if result.value == null then
-                        [ {{
-                            name = "AttrPathNotFound";
-                            msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
-                            severity = "error";
-                            link = false;
-                        }} ]
-                    else
-                        result.value.__nixpkgs-hammering-state.reports or [];
+              let
+                result = builtins.tryEval pkgs.{attr} or null;
+              in
+                if !result.success then
+                  {{
+                    report = [ {{
+                      name = "EvalError";
+                      msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
+                      severity = "warning";
+                      link = false;
+                    }} ];
+                    position = null;
+                  }}
+                else if result.value == null then
+                  {{
+                    report = [ {{
+                      name = "AttrPathNotFound";
+                      msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
+                      severity = "error";
+                      link = false;
+                    }} ];
+                    position = null;
+                  }}
+                else
+                  {{
+                    report = result.value.__nixpkgs-hammering-state.reports or [];
+                    position = result.value.meta.position;
+                  }};
             '''
         ))
 
@@ -227,8 +220,17 @@ def main(args):
     if args.show_trace:
         print('Nix expression:', all_messages_nix, file=sys.stderr)
 
-    all_overlay_messages = nix_eval_json(all_messages_nix, args.show_trace)
-    all_ast_check_messages = ast_checks(args.nix_file, args.attr_paths, args.excluded_rules)
+    overlay_data = nix_eval_json(all_messages_nix, args.show_trace)
+    all_overlay_messages = {
+        attr_path: value["report"]
+        for attr_path, value in overlay_data.items()
+    }
+    attr_files = {
+        attr_path: value["position"]
+        for attr_path, value in overlay_data.items()
+    }
+
+    all_ast_check_messages = ast_checks(attr_files, args.excluded_rules)
     all_messages = concatenate_messages(all_overlay_messages, all_ast_check_messages)
 
     if args.json:
