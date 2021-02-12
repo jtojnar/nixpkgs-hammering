@@ -17,7 +17,7 @@ let
         else
           [ item ];
     in
-      builtins.concatMap flattenGroup (import ../lib/derivation-attributes.nix);
+      builtins.concatMap flattenGroup (import ../lib/derivation-attributes.nix) ++ import ../lib/derivation-attributes-unordered.nix;
 
   knownAttributeNamesLowerMapping = builtins.listToAttrs (map (item: { name = lib.toLower item; value = item; }) knowAttributeNames);
   knownAttributeNamesLower = builtins.attrNames knownAttributeNamesLowerMapping;
