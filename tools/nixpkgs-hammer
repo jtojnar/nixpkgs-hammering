@@ -175,7 +175,7 @@ def main(args):
                 result = builtins.tryEval cleanPkgs.{attr} or {{ }};
             in
                 if result.success then
-                    getDrvSourceLocation result.value
+                    result.value.meta.position
                 else
                     null
             '''
@@ -204,7 +204,6 @@ def main(args):
     all_messages_nix = textwrap.dedent(
         f'''
         let
-            inherit (import {lib_dir / 'standalone.nix'}) getDrvSourceLocation;
             builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
             cleanPkgs = import {args.nix_file} {{ }};
