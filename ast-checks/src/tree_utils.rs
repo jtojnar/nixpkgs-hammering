@@ -39,3 +39,7 @@ pub fn prev_siblings(element: &SyntaxElement) -> impl Iterator<Item = SyntaxElem
         it.prev_sibling_or_token()
     }))
 }
+
+pub fn parents(node: SyntaxNode) -> impl Iterator<Item = SyntaxNode> {
+    std::iter::successors(Some(node), |node| node.parent())
+}

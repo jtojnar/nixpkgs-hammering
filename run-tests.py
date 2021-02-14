@@ -19,10 +19,11 @@ def make_test_variant(rule, variant=None, should_match=True):
                 attr_path
             ],
             stdout=subprocess.PIPE,
+            text=True,
         )
 
         if test_build.returncode != 0:
-            raise Exception('error building the test:' + test_build.stdout.decode('utf-8'))
+            raise Exception('error building the test:' + test_build.stdout)
         else:
             report = json.loads(test_build.stdout)
             matches = any(check['name'] == rule for check in report[attr_path])
@@ -159,6 +160,9 @@ class TestSuite(unittest.TestSuite):
                 'general-comment',
                 'comment-above',
                 'comment-within',
+                'complex-structure1',
+                'ignore-nested-lists1',
+                'ignore-nested-lists2',
             ]
         )
 
