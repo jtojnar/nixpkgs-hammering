@@ -63,6 +63,13 @@ class TestSuite(unittest.TestSuite):
 
     def __iter__(self):
         yield make_test_rule(
+            'AttrPathNotFound',
+            [
+                'foobarbaz',
+            ],
+        )
+
+        yield make_test_rule(
             'attribute-ordering',
             [
                 'out-of-order',

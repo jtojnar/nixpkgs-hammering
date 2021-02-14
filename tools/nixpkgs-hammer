@@ -172,9 +172,9 @@ def main(args):
         name_position = textwrap.dedent(
             f'''
             let
-                result = builtins.tryEval cleanPkgs.{attr} or {{ }};
+                result = builtins.tryEval cleanPkgs.{attr} or null;
             in
-                if result.success then
+                if result.success && result.value != null then
                     result.value.meta.position
                 else
                     null
@@ -227,6 +227,7 @@ def main(args):
     attr_files = {
         attr_path: value["position"]
         for attr_path, value in overlay_data.items()
+        if value['position'] is not None
     }
 
     all_ast_check_messages = ast_checks(attr_files, args.excluded_rules)
