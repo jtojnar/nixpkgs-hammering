@@ -299,6 +299,8 @@ class TestSuite(unittest.TestSuite):
                 'used-pattern',
                 'used-single',
                 'unused-single',
+                'used-in-string1',
+                'used-in-string2',
             ]
         )
 

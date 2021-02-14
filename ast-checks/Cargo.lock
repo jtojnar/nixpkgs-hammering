@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "rnix"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2192039d0f383be6e0edb37718152c764509ce800cafe51f58f88b27bf0e4714"
+checksum = "cbbea4c714e5bbf462fa4316ddf45875d8f0e28e5db81050b5f9ce99746c6863"
 dependencies = [
  "cbitset",
  "rowan",
@@ -90,14 +90,15 @@ dependencies = [
 
 [[package]]
 name = "rowan"
-version = "0.6.3"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc3a6fb2a35518af7cab43ec4e21ca82eb086a8b3bb1739e426dc3923d459607"
+checksum = "1ea7cadf87a9d8432e85cb4eb86bd2e765ace60c24ef86e79084dcae5d1c5a19"
 dependencies = [
  "rustc-hash",
  "serde",
  "smol_str",
  "text_unit",
+ "thin-dst",
 ]
 
 [[package]]
@@ -177,6 +178,12 @@ checksum = "20431e104bfecc1a40872578dbc390e10290a0e9c35fffe3ce6f73c15a9dbfc2"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "thin-dst"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db3c46be180f1af9673ebb27bc1235396f61ef6965b3fe0dbb2e624deb604f0e"
 
 [[package]]
 name = "unicode-width"
