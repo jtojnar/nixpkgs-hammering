@@ -31,16 +31,16 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
             .value()
             .ok_or("Internal logic error: Unable to extract value from key/value pair")?;
         let contained_nonnested_lists = walk_kind(&value, NODE_LIST).filter(|elem| {
-            // As we're walking down the tree looking for list nodes under `kv`, we don't
-            // want to walk too deep. We're looking for lists, but we don't want to find
+            // As we’re walking down the tree looking for list nodes under `kv`, we don’t
+            // want to walk too deep. We’re looking for lists, but we don’t want to find
             // any lists that are inside other lists, since those are likely not patches
-            // (they're probably arguments to `fetchpatch` like `excludes`)
+            // (they’re probably arguments to `fetchpatch` like `excludes`)
 
-            // So we'll filter the lists returned by walk_kind (which is doing a full
+            // So we’ll filter the lists returned by walk_kind (which is doing a full
             // tree traversal) by counting the number of lists that occur between this
             // node `elem` and `kv`, and checking for there to be only 1.
 
-            // N.b.: there's a more efficient way to do this, but it wouldn't allow us
+            // N.b.: there’s a more efficient way to do this, but it wouldn’t allow us
             // to re-use walk_kind and implementing our own tree traversal in rust is not
             // worth it -- speed is not an issue
             parents(elem.clone().into_node().unwrap())
@@ -51,7 +51,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
         });
         for elem in contained_nonnested_lists {
             let patch_list = List::cast(elem.into_node().ok_or(
-                "Inernal logic error: Unable to cast element with kind NODE_LIST to into a Node",
+                "Internal logic error: Unable to cast element with kind NODE_LIST to into a Node",
             )?)
             .ok_or(
                 "Internal logic error: Unable to cast from a node with kind NODE_LIST to a List",
@@ -71,7 +71,7 @@ fn process_patch_list(
     let mut report: Report = vec![];
 
     // For each element in the list of patches, look for
-    // a comment directly above the element or, if we don't see
+    // a comment directly above the element or, if we don’t see
     // one of those, look for a comment within AST of the element.
     for item in patchlist.items() {
         let has_comment_above = find_comment_above(&item).is_some();
