@@ -140,8 +140,9 @@ def main(args):
             "{attr}" =
               let
                 result = builtins.tryEval pkgs.{attr} or null;
+                maybeReport = builtins.tryEval (result.value.__nixpkgs-hammering-state.reports or []);
               in
-                if !result.success then
+                if !(result.success && maybeReport.success) then
                   {{
                     report = [ {{
                       name = "EvalError";
@@ -163,7 +164,7 @@ def main(args):
                   }}
                 else
                   {{
-                    report = result.value.__nixpkgs-hammering-state.reports or [];
+                    report = if maybeReport.success then maybeReport.value else [];
                     position = result.value.meta.position;
                   }};
             '''

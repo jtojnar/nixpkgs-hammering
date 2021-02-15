@@ -7,6 +7,7 @@
   attribute-typo = pkgs.callPackage ./attribute-typo { };
   build-tools-in-build-inputs = pkgs.recurseIntoAttrs (pkgs.callPackage ./build-tools-in-build-inputs { });
   duplicate-check-inputs = pkgs.python3.pkgs.callPackage ./duplicate-check-inputs { };
+  EvalError = pkgs.callPackage ./EvalError { };
   explicit-phases = pkgs.callPackage ./explicit-phases { };
   fixup-phase = pkgs.callPackage ./fixup-phase { };
   license-missing = pkgs.callPackage ./license-missing { };

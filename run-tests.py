@@ -110,6 +110,16 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'EvalError',
+            [
+                'exception',
+            ],
+            [
+                'no-exception',
+            ],
+        )
+
+        yield make_test_rule(
             'explicit-phases',
             [
                 'configure',
