@@ -15,4 +15,5 @@
   unused-single = pkgs.callPackage ./unused-single.nix { };
   used-in-string1 = pkgs.callPackage ./used-in-string1.nix { foo = "bar"; };
   used-in-string2 = pkgs.callPackage ./used-in-string2.nix { foo = "bar"; };
+  used-in-defaults = pkgs.callPackage ./used-in-defaults.nix { };
 }

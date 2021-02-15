@@ -2,8 +2,8 @@ use codespan::{FileId, Files};
 use nixpkgs_hammering_ast_checks::analysis::*;
 use nixpkgs_hammering_ast_checks::common_structs::*;
 use nixpkgs_hammering_ast_checks::tree_utils::walk_kind;
-use rnix::{types::*, SyntaxNode};
 use rnix::SyntaxKind::*;
+use rnix::{types::*, SyntaxNode};
 use std::{env, error::Error};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -34,13 +34,20 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
     // but hasn't been done yet because we don't think rare false negatives are a high
     // priority.
 
-    for lambda_elem in walk_kind(&root, NODE_LAMBDA) {
-        let lambda = lambda_elem.into_node().and_then(Lambda::cast);
-
+    for lambda in walk_kind(&root, NODE_LAMBDA)
+        .filter_map(|elem| elem.into_node().and_then(Lambda::cast))
+        .filter(|lambda| lambda.arg().and_then(Pattern::cast).is_some())
+    {
         let body = lambda
             .clone()
-            .and_then(|l| l.body())
+            .body()
             .ok_or("Unable to extract function body")?;
+
+        // Extract the formal parameters from pattern-type functions, and don't
+        // extract anything from single-argument functions because they often
+        // need to have unused arguments for overlay-type constructs.
+        let pattern = lambda.arg().and_then(Pattern::cast).unwrap();
+
         let identifiers_in_body: Vec<Ident> = walk_kind(&body, NODE_IDENT)
             .filter_map(|elem| elem.into_node())
             .filter_map(Ident::cast)
@@ -51,19 +58,27 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
             // does not mean that `x` is acting as a usage of the identifier
             // `x` for purposes of detecting unused variables
             .filter(|ident| !ident_is_attrset_key(ident.node()))
+            .chain(
+                // Also collect any identifiers that appear in the default
+                // definitions of arguments to the function, such as `pkgs` in
+                //
+                // { pkgs  # might look unused, but is not
+                // , foobarbazqux ? pkgs.hello
+                // }: …
+                pattern
+                    .entries()
+                    .filter_map(|entry| entry.default())
+                    .flat_map(|e| {
+                        walk_kind(&e, NODE_IDENT)
+                            .filter_map(|el| el.into_node())
+                            .filter_map(Ident::cast)
+                    }),
+            )
             .collect();
 
-        // Extract the formal parameters from pattern-type functions, and don't
-        // extract anything from single-argument functions because they often
-        // need to have unused arguments for overlay-type constructs.
-        let pattern = lambda.and_then(|l| l.arg()).and_then(Pattern::cast);
-        let formal_parameter_pattern_args = match pattern {
-            Some(pattern) => pattern.entries().filter_map(|entry| entry.name()).collect(),
-            None => vec![],
-        };
-
-        let unused_formal_parameters = formal_parameter_pattern_args
-            .iter()
+        let unused_formal_parameters = pattern
+            .entries()
+            .filter_map(|entry| entry.name())
             // Filter out formal parameters that are used as identifiers
             // in the function body
             .filter(|formal| {
@@ -89,6 +104,6 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
 fn ident_is_attrset_key(node: &SyntaxNode) -> bool {
     match node.parent() {
         Some(p) if p.kind() == NODE_KEY => true,
-        _ => false
+        _ => false,
     }
 }

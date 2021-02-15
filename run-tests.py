@@ -315,6 +315,7 @@ class TestSuite(unittest.TestSuite):
                 'unused-single',
                 'used-in-string1',
                 'used-in-string2',
+                'used-in-defaults',
             ]
         )
 
