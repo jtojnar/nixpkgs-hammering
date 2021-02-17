@@ -8,6 +8,7 @@
   "preHook"
   "strictDeps"
   "hardeningDisable"
+  "hardeningEnable"
 
   # Taken from stdenv.xml
   "depsBuildBuild"
