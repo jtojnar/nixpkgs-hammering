@@ -8,9 +8,19 @@ import unittest
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-def make_test_variant(rule, variant=None, should_match=True):
+def make_test_variant(rule, variant=None, should_match=True, prebuild=False):
     def case():
         attr_path=f'{rule}.{variant}' if variant is not None else rule
+
+        if prebuild:
+            subprocess.run([
+                "nix",
+                "build",
+                "--no-link",
+                "-f", "./tests",
+                attr_path
+            ], check=True, stdout=subprocess.PIPE)
+
         test_build = subprocess.run(
             [
                 'nixpkgs-hammer',
@@ -35,14 +45,14 @@ def make_test_variant(rule, variant=None, should_match=True):
     return case
 
 
-def make_test_rule(rule, matching_variants=None, nonmatching_variants=[]):
+def make_test_rule(rule, matching_variants=None, nonmatching_variants=[], prebuild=False):
     if matching_variants is not None:
         suite = unittest.TestSuite()
         for variant in matching_variants:
-            suite.addTest(FunctionTestCase(make_test_variant(rule, variant), description=f'{rule}.{variant}'))
+            suite.addTest(FunctionTestCase(make_test_variant(rule, variant, prebuild=prebuild), description=f'{rule}.{variant}'))
 
         for variant in nonmatching_variants:
-            suite.addTest(FunctionTestCase(make_test_variant(rule, variant, should_match=False), description=f'{rule}.{variant}'))
+            suite.addTest(FunctionTestCase(make_test_variant(rule, variant, should_match=False, prebuild=prebuild), description=f'{rule}.{variant}'))
 
         return suite
     else:
@@ -78,8 +88,9 @@ class TestSuite(unittest.TestSuite):
             [
                 'inherited',
                 'properly-ordered',
-            ]
+            ],
         )
+        
 
         yield make_test_rule(
             'attribute-typo',
@@ -208,6 +219,16 @@ class TestSuite(unittest.TestSuite):
             ],
             [
                 'okay',
+            ],
+        )
+
+        yield make_test_rule(
+            'no-python-tests',
+            [
+                'no-tests',
+            ],
+            [
+                'pytest',
             ],
         )
 

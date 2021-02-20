@@ -17,6 +17,7 @@
   missing-phase-hooks = pkgs.callPackage ./missing-phase-hooks { };
   no-flags-array = pkgs.callPackage ./no-flags-array { };
   no-flags-spaces = pkgs.callPackage ./no-flags-spaces { };
+  no-python-tests = pkgs.python3.pkgs.callPackage ./no-python-tests { };
   no-uri-literals = pkgs.callPackage ./no-uri-literals { };
   patch-phase = pkgs.callPackage ./patch-phase { };
   python-explicit-check-phase = pkgs.python3.pkgs.callPackage ./python-explicit-check-phase { };
