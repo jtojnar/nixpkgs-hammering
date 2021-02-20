@@ -108,7 +108,11 @@ def run_external_checks(
     result: Dict[Attr, List[Report]] = defaultdict(list)
 
     for rule in rules:
-        json_text = subprocess.check_output([rule], text=True, input=encoded_attrs)
+        try:
+            json_text = subprocess.check_output([rule], text=True, input=encoded_attrs)
+        except subprocess.CalledProcessError:
+            print(red(f"Rule '{rule}'' failed with input '{encoded_attrs}'"), file=sys.stderr)
+            raise
         if len(json_text) > 0:
             for attr_name, reports in json.loads(json_text).items():
                 result[attr_name].extend(load_reports(reports))
@@ -144,9 +148,8 @@ def nix_eval_json(expr: str, show_trace: bool = False) -> Dict[Attr, List[Report
         return None
 
     def maybe_location(s: Optional[Dict]) -> Optional[SourceLocation]:
-        if s:
-            if isinstance(s.get("line"), str):
-                s["line"] = int(s["line"])
+        if s and isinstance(s.get("line"), str) and s["line"]:
+            s["line"] = int(s["line"])
             return SourceLocation(**s)
         return None
 
@@ -246,7 +249,7 @@ def main(args):
                   {{
                     report = if maybeReport.success then maybeReport.value else [];
                     location = let
-                      posSplit = builtins.split ":" result.value.meta.position;
+                      posSplit = builtins.split ":" (result.value.meta.position or ":");
                     in {{
                       file = builtins.elemAt posSplit 0;
                       line = builtins.elemAt posSplit 2;
@@ -264,7 +267,7 @@ def main(args):
                 result = builtins.tryEval cleanPkgs.{attr} or null;
             in
                 if result.success && result.value != null then
-                    result.value.meta.position
+                    result.value.meta.position or null
                 else
                     null
             """
