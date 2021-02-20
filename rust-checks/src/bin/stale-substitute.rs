@@ -12,18 +12,24 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>> {
-    let re = Regex::new(r"substituteStream\(\): WARNING: pattern (.*?) doesn't match anything in file '(.*?)'").unwrap();
+    let re = Regex::new(
+        r"substituteStream\(\): WARNING: pattern (.*?) doesn't match anything in file '(.*?)'",
+    )
+    .unwrap();
 
-    let report = match log.lines().any(|l| re.is_match(&l.unwrap())) {
-        true => vec![NixpkgsHammerMessage {
-            msg: "Stale substituteInPlace detected"
-                .to_string(),
+    let report = log
+        .lines()
+        .filter_map(|line| {
+            re.find(&line.unwrap())
+                .and_then(|m| Some(m.as_str().to_string()))
+        })
+        .map(|m| NixpkgsHammerMessage {
+            msg: format!("Stale substituteInPlace detected.\n{}", m),
             name: "stale-substitute",
             locations: vec![],
             link: true,
-        }],
-        false => vec![],
-    };
+        })
+        .collect();
 
     Ok(report)
 }

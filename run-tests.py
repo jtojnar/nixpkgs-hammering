@@ -81,6 +81,17 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'stale-substitute',
+            [
+                'stale',
+            ],
+            [
+                'live'
+            ],
+            True
+        )
+
+        yield make_test_rule(
             'attribute-ordering',
             [
                 'out-of-order',
@@ -90,7 +101,7 @@ class TestSuite(unittest.TestSuite):
                 'properly-ordered',
             ],
         )
-        
+
 
         yield make_test_rule(
             'attribute-typo',

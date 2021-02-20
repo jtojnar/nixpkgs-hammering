@@ -24,6 +24,7 @@
   python-imports-check-typo = pkgs.python3.pkgs.callPackage ./python-imports-check-typo { };
   python-include-tests = pkgs.python3.pkgs.callPackage ./python-include-tests { };
   python-inconsistent-interpreters = pkgs.python3.pkgs.callPackage ./python-inconsistent-interpreters { };
+  stale-substitute = pkgs.callPackage ./stale-substitute { };
   unclear-gpl = pkgs.callPackage ./unclear-gpl { };
   unnecessary-parallel-building = pkgs.callPackage ./unnecessary-parallel-building { };
   unused-argument = pkgs.callPackage ./unused-argument {};
