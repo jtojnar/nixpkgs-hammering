@@ -2,7 +2,7 @@
 }:
 
 buildPythonPackage {
-  pname = "redundant-pytest";
+  name = "redundant-pytest";
 
   src = ../fixtures/make;
 

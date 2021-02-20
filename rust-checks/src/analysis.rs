@@ -1,16 +1,20 @@
-use codespan::{FileId, Files};
 use crate::common_structs::{Attr, NixpkgsHammerMessage};
-use std::{collections::HashMap, error::Error, fs};
+use codespan::{FileId, Files};
 use rnix::{types::*, SyntaxNode};
-use std::process::{Command, Stdio, ChildStdout};
-use std::io::{BufReader};
+use std::io::BufReader;
+use std::path::Path;
+use std::process::{ChildStdout, Command, Stdio};
+use std::{collections::HashMap, error::Error, fs};
 
 pub type Report = Vec<NixpkgsHammerMessage>;
 pub type NixFileAnalyzer = fn(&Files<String>, FileId) -> Result<Report, Box<dyn Error>>;
 pub type LogFileAnalyzer = fn(BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>>;
 
 /// Runs given analyzer the nix file for each attr
-pub fn analyze_nix_files(attrs: Vec<Attr>, analyzer: NixFileAnalyzer) -> Result<String, Box<dyn Error>> {
+pub fn analyze_nix_files(
+    attrs: Vec<Attr>,
+    analyzer: NixFileAnalyzer,
+) -> Result<String, Box<dyn Error>> {
     let mut report: HashMap<String, Report> = HashMap::new();
 
     let mut files = Files::new();
@@ -23,14 +27,25 @@ pub fn analyze_nix_files(attrs: Vec<Attr>, analyzer: NixFileAnalyzer) -> Result<
     Ok(serde_json::to_string(&report)?)
 }
 
-
 /// Runs given analyzer on log file for each attr, if exists
-pub fn analyze_log_files(attrs: Vec<Attr>, analyzer: LogFileAnalyzer) -> Result<String, Box<dyn Error>> {
+pub fn analyze_log_files(
+    attrs: Vec<Attr>,
+    analyzer: LogFileAnalyzer,
+) -> Result<String, Box<dyn Error>> {
     let mut report: HashMap<String, Report> = HashMap::new();
 
-    for attr in attrs.iter().filter(|a| a.output.is_some()) {
+    for attr in attrs
+        .iter()
+        .filter(|a| a.output.is_some())
+        .filter(|a| Path::new(&a.output.as_ref().unwrap()).exists())
+    {
         let mut program = Command::new("nix")
-            .args(&["--experimental-features", "nix-command", "log", &attr.output.as_ref().unwrap()])
+            .args(&[
+                "--experimental-features",
+                "nix-command",
+                "log",
+                &attr.output.as_ref().unwrap(),
+            ])
             .stdout(Stdio::piped())
             .spawn()?;
 
@@ -41,12 +56,8 @@ pub fn analyze_log_files(attrs: Vec<Attr>, analyzer: LogFileAnalyzer) -> Result<
     Ok(serde_json::to_string(&report)?)
 }
 
-
 /// Parses a Nix file and returns a root AST node.
-pub fn find_root(
-    files: &Files<String>,
-    file_id: FileId,
-) -> Result<SyntaxNode, String> {
+pub fn find_root(files: &Files<String>, file_id: FileId) -> Result<SyntaxNode, String> {
     let ast = rnix::parse(files.source(file_id))
         .as_result()
         .map_err(|_| {

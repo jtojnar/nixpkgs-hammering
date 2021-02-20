@@ -2,7 +2,7 @@
 }:
 
 buildPythonPackage {
-  pname = "pythonCheckImports";
+  name = "pythonCheckImports";
 
   src = ../fixtures/make;
 

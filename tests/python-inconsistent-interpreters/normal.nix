@@ -4,7 +4,7 @@
 }:
 
 buildPythonPackage rec {
-  pname = "package";
+  name = "package";
 
   propagatedBuildInputs = [
     numpy

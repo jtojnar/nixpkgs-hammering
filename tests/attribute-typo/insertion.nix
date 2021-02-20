@@ -6,5 +6,5 @@ stdenv.mkDerivation rec {
 
   src = ../fixtures/make;
 
-  passthrough = {};
+  passthrough = [];
 }

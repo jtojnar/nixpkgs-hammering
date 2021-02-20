@@ -3,7 +3,7 @@
 }:
 
 buildPythonPackage rec {
-  pname = "package";
+  name = "package";
 
   checkInputs = [
     python27Packages.numpy
