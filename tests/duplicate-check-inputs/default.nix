@@ -3,7 +3,7 @@
 }:
 
 buildPythonPackage {
-  name = "patch-phase";  
+  name = "patch-phase";
 
   src = ../fixtures/make;
 
