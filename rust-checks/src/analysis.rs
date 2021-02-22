@@ -1,10 +1,14 @@
 use crate::common_structs::{Attr, NixpkgsHammerMessage};
 use codespan::{FileId, Files};
 use rnix::{types::*, SyntaxNode};
+use std::io::BufReader;
+use std::path::Path;
+use std::process::{ChildStdout, Command, Stdio};
 use std::{collections::HashMap, error::Error, fs};
 
 pub type Report = Vec<NixpkgsHammerMessage>;
 pub type NixFileAnalyzer = fn(&Files<String>, FileId) -> Result<Report, Box<dyn Error>>;
+pub type LogFileAnalyzer = fn(BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>>;
 
 /// Runs given analyzer the nix file for each attr
 pub fn analyze_nix_files(
@@ -18,6 +22,35 @@ pub fn analyze_nix_files(
         let filename = attr.location.as_ref().unwrap().file.clone();
         let file_id = files.add(filename.clone(), fs::read_to_string(&filename)?);
         report.insert(attr.name.clone(), analyzer(&files, file_id)?);
+    }
+
+    Ok(serde_json::to_string(&report)?)
+}
+
+/// Runs given analyzer on log file for each attr, if exists
+pub fn analyze_log_files(
+    attrs: Vec<Attr>,
+    analyzer: LogFileAnalyzer,
+) -> Result<String, Box<dyn Error>> {
+    let mut report: HashMap<String, Report> = HashMap::new();
+
+    for attr in attrs
+        .iter()
+        .filter(|a| a.output.is_some())
+        .filter(|a| Path::new(&a.output.as_ref().unwrap()).exists())
+    {
+        let mut program = Command::new("nix")
+            .args(&[
+                "--experimental-features",
+                "nix-command",
+                "log",
+                &attr.output.as_ref().unwrap(),
+            ])
+            .stdout(Stdio::piped())
+            .spawn()?;
+
+        let out = BufReader::new(program.stdout.take().unwrap());
+        report.insert(attr.name.clone(), analyzer(out)?);
     }
 
     Ok(serde_json::to_string(&report)?)

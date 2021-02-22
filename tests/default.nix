@@ -23,6 +23,7 @@
   python-imports-check-typo = pkgs.recurseIntoAttrs (pkgs.python3.pkgs.callPackage ./python-imports-check-typo { });
   python-include-tests = pkgs.recurseIntoAttrs (pkgs.python3.pkgs.callPackage ./python-include-tests { });
   python-inconsistent-interpreters = pkgs.recurseIntoAttrs (pkgs.python3.pkgs.callPackage ./python-inconsistent-interpreters { });
+  stale-substitute = pkgs.recurseIntoAttrs (pkgs.callPackage ./stale-substitute { });
   unclear-gpl = pkgs.recurseIntoAttrs (pkgs.callPackage ./unclear-gpl { });
   unnecessary-parallel-building = pkgs.recurseIntoAttrs (pkgs.callPackage ./unnecessary-parallel-building { });
   unused-argument = pkgs.recurseIntoAttrs (pkgs.callPackage ./unused-argument {});
