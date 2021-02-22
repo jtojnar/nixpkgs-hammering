@@ -4,6 +4,10 @@
 rec {
   attrByPathString = attrPath: lib.getAttrFromPath (lib.splitString "." attrPath);
 
+  # Removes reports with `cond == false` and then strips the `cond` attribute.
+  filterReports = reports:
+    map (report: builtins.removeAttrs report [ "cond" ]) (lib.filter ({ cond, ... }: cond) reports);
+
   capitalize = str:
     if builtins.stringLength str == 0 then
       str
@@ -21,7 +25,7 @@ rec {
 
     lib.recursiveUpdate originalDrv {
       __nixpkgs-hammering-state = {
-        reports = lib.unique (originalDrv.__nixpkgs-hammering-state.reports or [] ++ reports);
+        reports = lib.unique (originalDrv.__nixpkgs-hammering-state.reports or [] ++ filterReports reports);
       };
     };
 
@@ -44,7 +48,7 @@ rec {
     in
       if builtins.elem namePosition namePositions
       then
-        addReports originalDrv (lib.filter ({ cond, ... }: cond) (check args originalDrv))
+        addReports originalDrv (check args originalDrv)
       else
         originalDrv;
 
