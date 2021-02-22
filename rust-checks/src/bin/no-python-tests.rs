@@ -16,7 +16,7 @@ fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Er
 
     let report = match log.lines().any(|l| re.is_match(&l.unwrap())) {
         true => vec![NixpkgsHammerMessage {
-            msg: "Zero tests run by pytest detected: 'Ran 0 tests in 0.000s'"
+            msg: "Test runner could not discover any test cases: 'Ran 0 tests in 0.000s'"
                 .to_string(),
             name: "no-python-tests",
             locations: vec![],
