@@ -3,13 +3,14 @@
 , var2
 }:
 
-let
-  argument = {
-    inherit var1 var2;
-  };
-in
-  stdenv.mkDerivation {
-    name = "used-pattern";
+stdenv.mkDerivation {
+  name = "used-pattern";
 
-    src = ../fixtures/make;
-  }
+  src = ../fixtures/make;
+
+  passthru = {
+    argument = {
+      inherit var1 var2;
+    };
+  };
+}
