@@ -15,6 +15,8 @@ def make_test_variant(rule, variant=None, should_match=True, prebuild=False):
         if prebuild:
             subprocess.run([
                 "nix",
+                "--experimental-features",
+                "nix-command",
                 "build",
                 "--no-link",
                 "-f", "./tests",
