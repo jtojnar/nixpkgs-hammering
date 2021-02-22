@@ -9,6 +9,7 @@
   "strictDeps"
   "hardeningDisable"
   "hardeningEnable"
+  "dontAutoPatchelf"
 
   # Taken from stdenv.xml
   "depsBuildBuild"
