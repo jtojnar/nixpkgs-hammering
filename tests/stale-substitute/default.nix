@@ -3,7 +3,7 @@
 {
   # positive cases
   stale = pkgs.callPackage ./stale.nix { };
-  
-  # negative cases  
+
+  # negative cases
   live = pkgs.callPackage ./live.nix { };
 }
