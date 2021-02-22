@@ -2,7 +2,7 @@
 }:
 
 buildPythonPackage {
-  pname = "package";
+  name = "package";
 
   src = ../fixtures/make;
 

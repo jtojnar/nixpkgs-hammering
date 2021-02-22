@@ -3,7 +3,7 @@
 }:
 
 buildPythonPackage {
-  pname = "unclear-gpl-lgpl3-python";
+  name = "unclear-gpl-lgpl3-python";
 
   src = ../fixtures/make;
 

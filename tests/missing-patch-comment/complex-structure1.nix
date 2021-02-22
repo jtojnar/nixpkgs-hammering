@@ -13,9 +13,7 @@ stdenv.mkDerivation {
 
   patches = [
     # Plugin installation (very insecure) disabled (from Debian)
-    ./disable_plugins.patch
-    # Automatic version update disabled by default (from Debian)
-    ./no_updates_dialog.patch
+    ../fixtures/patch.patch
   ]
-  ++ lib.optional (!unrarSupport) ./dont_build_unrar_plugin.patch;
+  ++ lib.optional (!unrarSupport) ./foobar.patch;
 }

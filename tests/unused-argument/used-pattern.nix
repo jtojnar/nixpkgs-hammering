@@ -7,7 +7,10 @@ stdenv.mkDerivation {
   name = "used-pattern";
 
   src = ../fixtures/make;
-  argument = {
-    inherit var1 var2;
+
+  passthru = {
+    argument = {
+      inherit var1 var2;
+    };
   };
 }
