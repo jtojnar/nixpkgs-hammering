@@ -22,18 +22,18 @@
     naersk-lib = naersk.lib."${system}";
   in rec {
 
-    packages.ast-checks = naersk-lib.buildPackage {
-      name = "ast-checks";
-      root = ./ast-checks;
+    packages.rust-checks = naersk-lib.buildPackage {
+      name = "rust-checks";
+      root = ./rust-checks;
     };
 
     packages.nixpkgs-hammer =
       let
-        # Find all of the binaries installed by ast-checks. Note, if this changes
+        # Find all of the binaries installed by rust-checks. Note, if this changes
         # in the future to use wrappers or something else that pollute the bin/
         # directory, this logic will have to grow.
-        ast-check-names = let
-          binContents = builtins.readDir "${packages.ast-checks}/bin";
+        rust-check-names = let
+          binContents = builtins.readDir "${packages.rust-checks}/bin";
         in
           pkgs.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
       in
@@ -48,12 +48,10 @@
 
           wrapProgram "$out/bin/$name" \
               --prefix PATH ":" ${pkgs.lib.makeBinPath [
-                # For echo
-                pkgs.coreutils
                 pkgs.nixUnstable
-                packages.ast-checks
+                packages.rust-checks
               ]} \
-              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" ast-check-names}
+              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" rust-check-names}
           ln -s ${./overlays} $out/overlays
           ln -s ${./lib} $out/lib
         '';

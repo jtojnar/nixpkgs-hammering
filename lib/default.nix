@@ -3,6 +3,7 @@
 
 rec {
   attrByPathString = attrPath: lib.getAttrFromPath (lib.splitString "." attrPath);
+  filterReports = reports: map (r: builtins.removeAttrs r [ "cond" ]) reports;
 
   capitalize = str:
     if builtins.stringLength str == 0 then
@@ -21,7 +22,7 @@ rec {
 
     lib.recursiveUpdate originalDrv {
       __nixpkgs-hammering-state = {
-        reports = lib.unique (originalDrv.__nixpkgs-hammering-state.reports or [] ++ reports);
+        reports = lib.unique (originalDrv.__nixpkgs-hammering-state.reports or [] ++ filterReports reports);
       };
     };
 

@@ -1,14 +1,14 @@
 use codespan::{FileId, Files};
 use nixpkgs_hammering_ast_checks::analysis::*;
 use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within};
-use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation};
+use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation, Attr};
 use nixpkgs_hammering_ast_checks::tree_utils::{parents, walk_keyvalues_filter_key, walk_kind};
 use rnix::{types::*, SyntaxKind::*};
-use std::{env, error::Error};
+use std::{io, error::Error};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().skip(1).collect();
-    println!("{}", analyze_files(args, analyze_single_file)?);
+    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    println!("{}", analyze_nix_files(attrs, analyze_single_file)?);
     Ok(())
 }
 
@@ -23,6 +23,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
         // (Interpreting that as a comment which applies to all patches.)
         find_comment_above(kv.node()).is_none()
     });
+
 
     // For each list of patches without a top comment,
     // produce a report for each patch that is missing a per-patch comment.
