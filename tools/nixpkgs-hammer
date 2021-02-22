@@ -15,16 +15,17 @@ def get_ast_check_programs():
     # Each rule that is implemented as an AST check rather than an overlay
     # is installed onto our PATH, and the names of the rules put into this
     # environment variable.
-    ast_checks = os.environ.get('AST_CHECK_NAMES')
+    ast_checks = os.environ.get("AST_CHECK_NAMES")
 
     if ast_checks:
-        return set(ast_checks.split(':'))
+        return set(ast_checks.split(":"))
 
     return set()
 
 
-
-def ast_checks(attr_positions: Dict[str, str], excluded_rules: List[str]) -> Dict[str, List]:
+def ast_checks(
+    attr_positions: Dict[str, str], excluded_rules: List[str]
+) -> Dict[str, List]:
     file_to_attr = defaultdict(list)
     for attr, file_colon_line in attr_positions.items():
         file = file_colon_line.rsplit(":", 1)[0]
@@ -53,80 +54,78 @@ def concatenate_messages(*message_sources):
 
 
 def escape_nix_string(val: str) -> str:
-    return '"' + val.replace('\\', '\\\\').replace('"', '\\"') + '"'
+    return '"' + val.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def nix_eval_json(expr: str, show_trace: bool=False):
-    args = ['nix-instantiate', '--strict', '--json', '--eval', '-']
+def nix_eval_json(expr: str, show_trace: bool = False):
+    args = ["nix-instantiate", "--strict", "--json", "--eval", "-"]
 
     if show_trace:
-        args.append('--show-trace')
+        args.append("--show-trace")
 
-    result = subprocess.check_output(
-        args,
-        encoding='utf-8',
-        input=expr
-    )
+    result = subprocess.check_output(args, encoding="utf-8", input=expr)
     return json.loads(result)
 
 
 def bold(msg):
-    return f'[1m{msg}[0m'
+    return f"[1m{msg}[0m"
 
 
 def yellow(msg):
-    return f'[1;33m{msg}[0m'
+    return f"[1;33m{msg}[0m"
 
 
 def red(msg):
-    return f'[1;31m{msg}[0m'
+    return f"[1;31m{msg}[0m"
 
 
 def green(msg):
-    return f'[1;32m{msg}[0m'
+    return f"[1;32m{msg}[0m"
 
 
 def indent(text: str, steps=1) -> str:
-    return textwrap.indent(text, ' ' * 4 * steps)
+    return textwrap.indent(text, " " * 4 * steps)
 
 
 def stringify_location(file, line, column):
-    with open(file, 'r') as opened_file:
+    with open(file, "r") as opened_file:
         all_lines = opened_file.read().splitlines()
         line_contents = all_lines[line - 1]
-        line_spaces = ' ' * len(str(line))
-        pointer = ' ' * (column - 1) + '^'
+        line_spaces = " " * len(str(line))
+        pointer = " " * (column - 1) + "^"
 
         location_lines = [
-            'Near ' + file + ':' + str(line) + ':' + str(column) + ':',
-            line_spaces + ' |',
-            str(line) + ' | ' + line_contents,
-            line_spaces + ' | ' + pointer,
+            "Near " + file + ":" + str(line) + ":" + str(column) + ":",
+            line_spaces + " |",
+            str(line) + " | " + line_contents,
+            line_spaces + " | " + pointer,
         ]
 
-    return '\n'.join(location_lines)
+    return "\n".join(location_lines)
 
 
-def stringify_message(name, msg, locations=[], cond=True, link=True, severity='warning'):
-    color = red if severity == 'error' else yellow
+def stringify_message(
+    name, msg, locations=[], cond=True, link=True, severity="warning"
+):
+    color = red if severity == "error" else yellow
 
     message_lines = [
-        color(f'{severity}: {name}'),
+        color(f"{severity}: {name}"),
         msg,
     ] + list(map(lambda loc: stringify_location(**loc), locations))
 
     if link:
         message_lines.append(
-            f'See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/{name}.md',
+            f"See: https://github.com/jtojnar/nixpkgs-hammering/blob/master/explanations/{name}.md",
         )
 
-    return '\n'.join(message_lines)
+    return "\n".join(message_lines)
 
 
 def main(args):
     script_dir = Path(__file__).parent
-    overlay_generators_path = (script_dir.parent / 'overlays').absolute()
-    lib_dir = (script_dir.parent / 'lib').absolute()
+    overlay_generators_path = (script_dir.parent / "overlays").absolute()
+    lib_dir = (script_dir.parent / "lib").absolute()
 
     attrs_nix = []
     attr_messages = []
@@ -135,43 +134,45 @@ def main(args):
     for attr in args.attr_paths:
         attrs_nix.append(escape_nix_string(attr))
 
-        attr_messages.append(textwrap.dedent(
-            f'''
-            "{attr}" =
-              let
-                result = builtins.tryEval pkgs.{attr} or null;
-                maybeReport = builtins.tryEval (result.value.__nixpkgs-hammering-state.reports or []);
-              in
-                if !(result.success && maybeReport.success) then
-                  {{
-                    report = [ {{
-                      name = "EvalError";
-                      msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
-                      severity = "warning";
-                      link = false;
-                    }} ];
-                    position = null;
-                  }}
-                else if result.value == null then
-                  {{
-                    report = [ {{
-                      name = "AttrPathNotFound";
-                      msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
-                      severity = "error";
-                      link = false;
-                    }} ];
-                    position = null;
-                  }}
-                else
-                  {{
-                    report = if maybeReport.success then maybeReport.value else [];
-                    position = result.value.meta.position;
-                  }};
-            '''
-        ))
+        attr_messages.append(
+            textwrap.dedent(
+                f"""
+                "{attr}" =
+                  let
+                    result = builtins.tryEval pkgs.{attr} or null;
+                    maybeReport = builtins.tryEval (result.value.__nixpkgs-hammering-state.reports or []);
+                  in
+                    if !(result.success && maybeReport.success) then
+                      {{
+                        report = [ {{
+                          name = "EvalError";
+                          msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
+                          severity = "warning";
+                          link = false;
+                        }} ];
+                        position = null;
+                      }}
+                    else if result.value == null then
+                      {{
+                        report = [ {{
+                          name = "AttrPathNotFound";
+                          msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
+                          severity = "error";
+                          link = false;
+                        }} ];
+                        position = null;
+                      }}
+                    else
+                      {{
+                        report = if maybeReport.success then maybeReport.value else [];
+                        position = result.value.meta.position;
+                      }};
+                """
+            )
+        )
 
         name_position = textwrap.dedent(
-            f'''
+            f"""
             let
                 result = builtins.tryEval cleanPkgs.{attr} or null;
             in
@@ -179,31 +180,41 @@ def main(args):
                     result.value.meta.position
                 else
                     null
-            '''
+            """
         )
-        name_positions.append('(' + name_position.strip() + ')')
+        name_positions.append("(" + name_position.strip() + ")")
 
     # Our overlays need to know the built attributes so that they can check only them.
     # We do it by using functions that return overlays so we need to instantiate them.
     overlay_expressions = []
-    for overlay_generator in overlay_generators_path.glob('*'):
+    for overlay_generator in overlay_generators_path.glob("*"):
         if overlay_generator.stem in args.excluded_rules:
             continue
 
         overlay = overlay_generator.name
-        overlay_expressions.append(textwrap.dedent(
-            f'''
-            (import {overlay_generators_path}/{overlay} {{
-                inherit builtAttrs packageSet namePositions;
-            }})
-            '''
-        ))
+        overlay_expressions.append(
+            textwrap.dedent(
+                f"""
+                (import {overlay_generators_path}/{overlay} {{
+                    inherit builtAttrs packageSet namePositions;
+                }})
+                """
+            )
+        )
 
-    name_positions_nix = '[\n' + indent('\n'.join(name_positions)) + '\n]' if name_positions else '[ ]'
-    attr_messages_nix = '{\n' + indent(''.join(attr_messages)) + '\n}' if attr_messages else '{ }'
-    overlays_nix = '[\n' + indent(''.join(overlay_expressions)) + '\n]' if name_positions else '[ ]'
+    name_positions_nix = (
+        "[\n" + indent("\n".join(name_positions)) + "\n]" if name_positions else "[ ]"
+    )
+    attr_messages_nix = (
+        "{\n" + indent("".join(attr_messages)) + "\n}" if attr_messages else "{ }"
+    )
+    overlays_nix = (
+        "[\n" + indent("".join(overlay_expressions)) + "\n]"
+        if name_positions
+        else "[ ]"
+    )
     all_messages_nix = textwrap.dedent(
-        f'''
+        f"""
         let
             builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
@@ -214,21 +225,20 @@ def main(args):
                 overlays = {indent(overlays_nix, 2 + 2).strip()};
             }};
         in {indent(attr_messages_nix, 2 + 0).strip()}
-        '''
+        """
     )
 
     if args.show_trace:
-        print('Nix expression:', all_messages_nix, file=sys.stderr)
+        print("Nix expression:", all_messages_nix, file=sys.stderr)
 
     overlay_data = nix_eval_json(all_messages_nix, args.show_trace)
     all_overlay_messages = {
-        attr_path: value["report"]
-        for attr_path, value in overlay_data.items()
+        attr_path: value["report"] for attr_path, value in overlay_data.items()
     }
     attr_files = {
         attr_path: value["position"]
         for attr_path, value in overlay_data.items()
-        if value['position'] is not None
+        if value["position"] is not None
     }
 
     all_ast_check_messages = ast_checks(attr_files, args.excluded_rules)
@@ -238,56 +248,65 @@ def main(args):
         print(json.dumps(all_messages))
     else:
         for attr, messages in all_messages.items():
-            print(bold(f'When evaluating attribute ‘{attr}’:'), file=sys.stderr)
+            print(bold(f"When evaluating attribute ‘{attr}’:"), file=sys.stderr)
             if len(messages) > 0:
-                print('\n'.join(map(lambda msg: stringify_message(**msg), messages)), file=sys.stderr)
+                print(
+                    "\n".join(map(lambda msg: stringify_message(**msg), messages)),
+                    file=sys.stderr,
+                )
             else:
-                print(green('No issues found.'), file=sys.stderr)
+                print(green("No issues found."), file=sys.stderr)
             print(file=sys.stderr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog='nixpkgs-hammer',
-        description='check package expressions for common mistakes',
+        prog="nixpkgs-hammer",
+        description="check package expressions for common mistakes",
     )
     parser.add_argument(
-        '-f',
-        '--file',
-        dest='nix_file',
-        metavar='FILE',
+        "-f",
+        "--file",
+        dest="nix_file",
+        metavar="FILE",
         # Absolutize so we can refer to it from Nix.
         type=lambda p: Path(p).resolve(strict=True),
         # Nix defaults to current directory when file not specified.
         default=Path.cwd(),
-        help='evaluate attributes in given path rather than the default (current working directory). The path needs to be importable by Nix and the imported value has to accept attribute set with overlays attribute as an argument.',
+        help=(
+            "evaluate attributes in given path rather than the default "
+            "(current working directory). The path needs to be importable "
+            "by Nix and the imported value has to accept attribute set "
+            "with overlays attribute as an argument."
+        ),
+    )
+
+    parser.add_argument(
+        "--show-trace",
+        dest="show_trace",
+        action="store_true",
+        help="show trace when error occurs",
     )
     parser.add_argument(
-        '--show-trace',
-        dest='show_trace',
-        action='store_true',
-        help='show trace when error occurs',
+        "--json",
+        dest="json",
+        action="store_true",
+        help="Output results as JSON",
     )
     parser.add_argument(
-        '--json',
-        dest='json',
-        action='store_true',
-        help='Output results as JSON',
-    )
-    parser.add_argument(
-        '-e',
-        '--exclude',
-        metavar='rule',
-        dest='excluded_rules',
-        action='append',
+        "-e",
+        "--exclude",
+        metavar="rule",
+        dest="excluded_rules",
+        action="append",
         default=[],
-        help='rule to exclude (can be passed repeatedly)',
+        help="rule to exclude (can be passed repeatedly)",
     )
     parser.add_argument(
-        'attr_paths',
-        metavar='attr-path',
-        nargs='+',
-        help='Attribute path of package to update',
+        "attr_paths",
+        metavar="attr-path",
+        nargs="+",
+        help="Attribute path of package to update",
     )
 
     args = parser.parse_args()
