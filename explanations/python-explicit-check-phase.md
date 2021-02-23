@@ -34,7 +34,6 @@ Also note that many flags that you might want to pass to `pytest` can be passed 
 - `disabledTestPaths` to disable particular pytest files or entire directories.
 - `pytestFlagsArray` to pass flags to pytest. This should not be used to disable tests or test files.
 
-
 Here is a complete example using `pytestCheckHook`, `pytestFlagsArray`, and `disabledTests` and `disabledTestPaths`:
 
 ```nix

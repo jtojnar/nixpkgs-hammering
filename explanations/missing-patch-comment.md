@@ -2,7 +2,7 @@ Each patch in nixpkgs applied to the upstream source should be documented. Out-o
 
 In each patch comment, please explain the purpose of the patch and link to the relevant upstream issue if possible. If the patch has been merged upstream but is not yet part of the released version, please note the version number or date in the comment such that a future maintainer updating the nix expression will know whether the patch has been incorporated upstream and can thus be removed from nixpkgs.
 
-Furthermore, please use a *stable* URL for the patch. Rather than, for example, linking to a GitHub pull request of the form `https://github.com/owner/repo/pull/pr_number.patch`, which would change every time a commit is added or the PR is force-pushed, link to a specific commit patch in the form `https://github.com/owner/repo/commit/sha.patch`.
+Furthermore, please use a _stable_ URL for the patch. Rather than, for example, linking to a GitHub pull request of the form `https://github.com/owner/repo/pull/pr_number.patch`, which would change every time a commit is added or the PR is force-pushed, link to a specific commit patch in the form `https://github.com/owner/repo/commit/sha.patch`.
 
 Here are two good examples of patch comments:
 

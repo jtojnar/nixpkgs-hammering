@@ -4,9 +4,10 @@ It is generally expected that an appropriate pre-phase hook (e.g. `preBuild`) ho
 
 Having phases run pre/post-phase hooks is important because many setup hooks insert their own code into them – omitting a hook might therefore prevent some setup hooks required for proper functionality of a package from running. Additionally, hooks are often inserted by developers into the package expression and by users when overriding a package using `overrideAttrs`. Not running them can thus cause confusion why their code is not executed.
 
-
 ## Examples
+
 ### Before
+
 ```nix
   installPhase = ''
     your commands
@@ -14,6 +15,7 @@ Having phases run pre/post-phase hooks is important because many setup hooks ins
 ```
 
 ### After
+
 ```nix
   installPhase = ''
     runHook preInstall
@@ -25,4 +27,5 @@ Having phases run pre/post-phase hooks is important because many setup hooks ins
 ```
 
 ## Alternatives
+
 And if you just want to add a flag to `make` call, you might not even need to override the phases, see [`explicit-phases`](explicit-phases.md) rule.

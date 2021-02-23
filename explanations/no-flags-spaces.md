@@ -5,7 +5,9 @@ Bash also does not really interpret the values of variables passed to derivation
 To fix this, add the flags to `buildFlagsArray` in one of the Bash hooks (e.g. in `preBuild`). Unfortunately, `*FlagsArray` [cannot be used](../no-flags-array.md) as a `mkDerivation` argument in Nix.
 
 ## Examples
+
 ### Before
+
 ```nix
 stdenv.mkDerivation {
   …
@@ -17,6 +19,7 @@ stdenv.mkDerivation {
 ```
 
 ### After
+
 ```nix
 stdenv.mkDerivation {
   …
@@ -30,6 +33,7 @@ stdenv.mkDerivation {
 ```
 
 ## Exceptions
+
 If the list item in question are actually multiple arguments:
 
 ```nix
@@ -57,4 +61,3 @@ or, if they are a key and a value and the script supports it, join them using `=
     "--with-foo=bar"
   ];
 ```
-

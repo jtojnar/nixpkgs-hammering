@@ -3,8 +3,9 @@ Many nixpkgs maintainers like having consistent ordering so we can quickly locat
 We start with general package information and sources that change every update, then list dependencies, set up build, potentially override the default builder phases and finally provide metadata. This is sort of high level to low level ordering but not exactly.
 
 ## Examples
+
 ```nix
-{ stdenv 
+{ stdenv
 , lib
 , fetchurl
 }:
@@ -29,7 +30,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
   ];
 
-  buildInputs = [ 
+  buildInputs = [
   ];
 
   propagatedNativeBuildInputs = [
@@ -48,13 +49,13 @@ stdenv.mkDerivation rec {
   configureFlags = [
   ];
   # or cmakeFlags, mesonFlags
-  
+
   # Build tool flags common for all phases.
   makeFlags = [
   ];
   # or ninjaFlags
 
-  # 
+  #
   buildFlags = [
   ];
 
@@ -68,7 +69,7 @@ stdenv.mkDerivation rec {
   # Enabling off-by-default phases.
   doCheck = true;
   doInstallCheck = true;
-  
+
   # Disabling on-by-default phases.
   dontBuild = true;
 

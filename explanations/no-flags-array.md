@@ -9,7 +9,9 @@ It does sort of work as expected if you only pass it a single flag (or multiple 
 I recommend using `buildFlags` in Nix if you are certain your list items do not contain spaces. If any of them may contain spaces, you will have to resort to setting `buildFlagsArray` in Bash (e.g. in `preBuild`). Unfortunately, we cannot really do any better until we switch to [`__structuredAttrs`](https://github.com/NixOS/nixpkgs/pull/72074).
 
 ## Example
+
 ### Before
+
 ```nix
 stdenv.mkDerivation {
   …
@@ -24,6 +26,7 @@ stdenv.mkDerivation {
 This will result in a the contents of the array being passed to make as a single argument: `make "PREFIX=$out LIBDIR=$out/lib"`.
 
 ### After
+
 ```nix
 stdenv.mkDerivation {
   …
