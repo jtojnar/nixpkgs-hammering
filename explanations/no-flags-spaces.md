@@ -2,7 +2,7 @@
 
 Bash also does not really interpret the values of variables passed to derivations so it does not matter if you include quotes, apostrophes, backslashes, dollar signs or any other special characters – you will not be able to sidestep this splitting behaviour.
 
-To fix this, add the flags to `buildFlagsArray` in one of the Bash hooks (e.g. in `preBuild`). Unfortunately, `*FlagsArray` [cannot be used](../no-flags-array.md) as a `mkDerivation` argument in Nix.
+To fix this, add the flags to `buildFlagsArray` in one of the Bash hooks (e.g. in `preBuild`). Unfortunately, `*FlagsArray` [cannot be used](./no-flags-array.md) as a `mkDerivation` argument in Nix.
 
 ## Examples
 
