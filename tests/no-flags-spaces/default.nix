@@ -7,4 +7,5 @@
 
   # negative cases
   okay = callPackage ./okay.nix { };
+  nonstring = callPackage ./nonstring.nix { };
 }

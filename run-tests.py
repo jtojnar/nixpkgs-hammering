@@ -208,6 +208,7 @@ class TestSuite(unittest.TestSuite):
             ],
             [
                 'okay',
+                'nonstring',
             ],
         )
 
