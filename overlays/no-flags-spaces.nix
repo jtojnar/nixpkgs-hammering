@@ -22,7 +22,7 @@ let
     "distFlags"
   ];
 
-  containsSpace = str: builtins.match ".*[[:space:]].*" str != null;
+  containsSpace = str: builtins.match ".*[[:space:]].*" (builtins.toString str) != null;
 
   checkDerivation = drvArgs: drv:
     (map
