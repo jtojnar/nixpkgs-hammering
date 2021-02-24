@@ -146,7 +146,7 @@ def main(args):
                       {{
                         report = [ {{
                           name = "EvalError";
-                          msg = "Cannot evaluate attribute ‘{attr}’ in ‘{args.nix_file}’.";
+                          msg = "Cannot evaluate attribute ‘{attr}’ in ‘${{packageSet}}’.";
                           severity = "warning";
                           link = false;
                         }} ];
@@ -156,7 +156,7 @@ def main(args):
                       {{
                         report = [ {{
                           name = "AttrPathNotFound";
-                          msg = "Packages in ‘{args.nix_file}’ do not contain ‘{attr}’ attribute.";
+                          msg = "Packages in ‘${{packageSet}}’ do not contain ‘{attr}’ attribute.";
                           severity = "error";
                           link = false;
                         }} ];
@@ -218,10 +218,10 @@ def main(args):
         let
             builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
-            cleanPkgs = import {args.nix_file} {{ }};
+            cleanPkgs = import packageSet {{ }};
             namePositions = builtins.filter (p: p != null) {indent(name_positions_nix, 2 + 1).strip()};
 
-            pkgs = import {args.nix_file} {{
+            pkgs = import packageSet {{
                 overlays = {indent(overlays_nix, 2 + 2).strip()};
             }};
         in {indent(attr_messages_nix, 2 + 0).strip()}
