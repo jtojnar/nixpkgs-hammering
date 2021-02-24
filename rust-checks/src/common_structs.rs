@@ -3,10 +3,18 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Attr {
+    pub name: String,
+    pub location: Option<SourceLocation>,
+    pub drv: Option<String>,
+    pub output: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SourceLocation {
-    pub column: usize,
-    pub line: usize,
     pub file: String,
+    pub line: usize,
+    pub column: Option<usize>,
 }
 
 impl SourceLocation {
@@ -24,7 +32,7 @@ impl SourceLocation {
                 .ok_or("encoding error")?
                 .to_string(),
             // Convert 0-based indexing to 1-based.
-            column: loc.column.to_usize() + 1,
+            column: Some(loc.column.to_usize() + 1),
             line: loc.line.to_usize() + 1,
         })
     }

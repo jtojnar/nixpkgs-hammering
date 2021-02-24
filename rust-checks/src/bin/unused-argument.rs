@@ -4,11 +4,11 @@ use nixpkgs_hammering_ast_checks::common_structs::*;
 use nixpkgs_hammering_ast_checks::tree_utils::walk_kind;
 use rnix::SyntaxKind::*;
 use rnix::{types::*, SyntaxNode};
-use std::{env, error::Error};
+use std::{io, error::Error};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().skip(1).collect();
-    println!("{}", analyze_files(args, analyze_single_file)?);
+    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    println!("{}", analyze_nix_files(attrs, analyze_single_file)?);
     Ok(())
 }
 

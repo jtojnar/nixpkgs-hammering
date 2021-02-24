@@ -1,13 +1,13 @@
 use codespan::{FileId, Files};
 use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation};
+use nixpkgs_hammering_ast_checks::common_structs::{Attr, NixpkgsHammerMessage, SourceLocation};
 use rnix::SyntaxKind::*;
-use std::{env, error::Error};
+use std::{io, error::Error};
 use nixpkgs_hammering_ast_checks::tree_utils::walk_kind;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().skip(1).collect();
-    println!("{}", analyze_files(args, analyze_single_file)?);
+    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    println!("{}", analyze_nix_files(attrs, analyze_single_file)?);
     Ok(())
 }
 
