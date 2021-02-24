@@ -44,7 +44,7 @@ rec {
 
     let
       originalDrv = originalFunction args;
-      namePosition = originalDrv.meta.position;
+      namePosition = originalDrv.meta.position or null;
     in
       if builtins.elem namePosition namePositions
       then
