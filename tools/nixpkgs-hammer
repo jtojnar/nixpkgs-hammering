@@ -57,6 +57,10 @@ def escape_nix_string(val: str) -> str:
     return '"' + val.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def escape_attr(attr: str) -> str:
+    return ".".join(f'"{section}"' for section in attr.split("."))
+
+
 def nix_eval_json(expr: str, show_trace: bool = False):
     args = ["nix-instantiate", "--strict", "--json", "--eval", "-"]
 
@@ -139,7 +143,7 @@ def main(args):
                 f"""
                 "{attr}" =
                   let
-                    result = builtins.tryEval pkgs.{attr} or null;
+                    result = builtins.tryEval pkgs.{escape_attr(attr)} or null;
                     maybeReport = builtins.tryEval (result.value.__nixpkgs-hammering-state.reports or []);
                   in
                     if !(result.success && maybeReport.success) then
@@ -174,7 +178,7 @@ def main(args):
         name_position = textwrap.dedent(
             f"""
             let
-                result = builtins.tryEval cleanPkgs.{attr} or null;
+                result = builtins.tryEval cleanPkgs.{escape_attr(attr)} or null;
             in
                 if result.success && result.value != null then
                     result.value.meta.position
