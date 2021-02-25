@@ -48,8 +48,6 @@
 
           wrapProgram "$out/bin/$name" \
               --prefix PATH ":" ${pkgs.lib.makeBinPath [
-                # For echo
-                pkgs.coreutils
                 pkgs.nixUnstable
                 packages.rust-checks
               ]} \
