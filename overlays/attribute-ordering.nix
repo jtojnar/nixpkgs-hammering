@@ -32,7 +32,12 @@ let
       getAttrPos = attr: (builtins.unsafeGetAttrPos attr drvArgs);
       getAttrLine = attr: (getAttrPos attr).line;
 
-      drvAttrs = builtins.sort (a: b: getAttrLine a < getAttrLine b) (builtins.attrNames drvArgs);
+      drvAttrs = lib.pipe drvArgs [
+        builtins.attrNames
+        # Certain functions like mapAttrs can produce attributes without associated position.
+        (builtins.filter (attr: getAttrPos attr != null))
+        (builtins.sort (a: b: getAttrLine a < getAttrLine b))
+      ];
 
       knownDrvAttrs = builtins.filter (attr: preferredOrdering ? "${attr}") drvAttrs;
 
