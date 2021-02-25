@@ -15,7 +15,7 @@ let
         let
           hasCheckPhase = drvArgs ? checkPhase;
           hasDoCheckFalse = (drvArgs ? doCheck) && (drvArgs.doCheck == false);
-          hasPytestCheckHook = drvArgs ? checkInputs && lib.any (n: n.name == "pytest-check-hook") drvArgs.checkInputs;
+          hasPytestCheckHook = drvArgs ? checkInputs && lib.any (n: (n.name or "") == "pytest-check-hook") drvArgs.checkInputs;
           hasPythonImportsCheck = drvArgs ? pythonImportsCheck;
 
           hasActiveCheckPhase = (hasCheckPhase || hasPytestCheckHook) && (!hasDoCheckFalse);
