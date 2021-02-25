@@ -1,1 +1,2 @@
-ast-checks/target
+/rust-checks/target
+/result*
