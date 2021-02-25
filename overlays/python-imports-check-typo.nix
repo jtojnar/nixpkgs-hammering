@@ -1,8 +1,3 @@
-{ builtAttrs
-, packageSet
-, namePositions
-}@attrs:
-
 final: prev:
 let
   inherit (prev) lib;
@@ -30,4 +25,4 @@ let
       incorrectSpellings
     );
 in
-  checkBuildPythonPackageFor checkDerivation attrs final prev
+  checkBuildPythonPackageFor checkDerivation final prev

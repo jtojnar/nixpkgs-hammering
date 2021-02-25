@@ -1,8 +1,3 @@
-{ builtAttrs
-, packageSet
-, namePositions
-}@attrs:
-
 final: prev:
 let
   inherit (prev) lib;
@@ -39,5 +34,5 @@ let
             ${lib.concatMapStringsSep "\n" (p: "- ${p}") allPythonNames}
           '';
       };
-  in
-checkBuildPythonPackageFor checkDerivation attrs final prev
+in
+  checkBuildPythonPackageFor checkDerivation final prev

@@ -32,12 +32,11 @@ rec {
   # Identity element for overlays.
   idOverlay = final: prev: {};
 
-  # Creates a function based on the original one, that, when called on
-  # one of the requested packages, runs a check on the arguments passed to it
-  # and then returns the original result enriched with the reports.
+  # Creates a function based on the original one, that runs a check
+  # on the arguments passed to it and then returns the original result
+  # enriched with the reports.
   wrapFunctionWithChecks =
     originalFunction:
-    namePositions:
     check:
 
     args:
@@ -46,40 +45,27 @@ rec {
       originalDrv = originalFunction args;
       namePosition = originalDrv.meta.position or null;
     in
-      if builtins.elem namePosition namePositions
-      then
-        addReports originalDrv (check args originalDrv)
-      else
-        originalDrv;
+      addReports originalDrv (check args originalDrv);
 
-  # Creates an overlay that replaces stdenv.mkDerivation with a function that,
-  # for packages with locations of name attribute matching one of the namePositions,
+  # Creates an overlay that replaces stdenv.mkDerivation with a function that
   # checks the attribute set passed as argument to mkDerivation.
   checkMkDerivationFor =
     check:
-
-    { namePositions
-    , ...
-    }:
 
     final:
     prev:
 
     {
       stdenv = prev.stdenv // {
-        mkDerivation = wrapFunctionWithChecks prev.stdenv.mkDerivation namePositions check;
+        mkDerivation = wrapFunctionWithChecks prev.stdenv.mkDerivation check;
       };
     };
 
-    # Creates an overlay that replaces buildPythonPackage with a function that,
-    # for packages with locations of name attribute matching one of the namePositions,
+    # Creates an overlay that replaces buildPythonPackage with a function that
     # checks the attribute set passed as argument
     checkBuildPythonPackageFor =
       check:
-      {
-        namePositions
-        , ...
-      }:
+
       final:
       prev:
 
@@ -107,7 +93,7 @@ rec {
         lib.genAttrs pythonPackageSetNames (pythonName:
           prev.${pythonName}.override (oldOverrides: {
             packageOverrides = lib.composeExtensions (oldOverrides.packageOverrides or idOverlay) (final: prev: {
-              buildPythonPackage = wrapFunctionWithChecks prev.buildPythonPackage namePositions check;
+              buildPythonPackage = wrapFunctionWithChecks prev.buildPythonPackage check;
             });
           }));
 
@@ -115,5 +101,5 @@ rec {
       let
         o1 = (checkMkDerivationFor check);
         o2 = (checkBuildPythonPackageFor check);
-      in attrs: lib.composeExtensions (o1 attrs) (o2 attrs);
+      in lib.composeExtensions o1 o2;
 }

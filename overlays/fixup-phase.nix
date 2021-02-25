@@ -1,8 +1,3 @@
-{ builtAttrs
-, packageSet
-, namePositions
-}@attrs:
-
 final: prev:
 let
   inherit (prev) lib;
@@ -21,4 +16,4 @@ let
     };
 
 in
-  checkMkDerivationFor checkDerivation attrs final prev
+  checkMkDerivationFor checkDerivation final prev

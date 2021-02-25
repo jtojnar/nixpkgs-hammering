@@ -22,11 +22,11 @@ nix run github:jtojnar/nixpkgs-hammering <attr-path>...
 
 ## How does this work?
 
-In order to make the checks not apply to unwanted derivations, we need to pass the information about our targets to the overlays. Unfortunately, we cannot use the attribute paths, since the `mkDerivation` function is not aware of them. Nix does offer minor meta-programming facility through `builtins.unsafeGetAttrPos` but we cannot use the positions of the attributes for the same reason. We could try matching the `name` attributes but there might be multiple packages with the same `name` depending on each other. But we can combine the two approaches and get the position of `name` attribute within the expression – this should uniquely identify the expression and be available among the `mkDerivation` arguments.
+There are two kinds of checks.
 
-## Why overlays?
+The first kind can be expressed directly in Nix and they are implemented as Nixpkgs overlays that replace `stdenv.mkDerivation` and other similar functions and attach an attribute containing a report to the resulting derivation’s attribute set. The tool then evaluates the attribute.
 
-We could try to analyse the syntax of an expression but outside of context of nixpkgs we would have no semantics (perhaps we do not care and syntax only rules would be sufficient). Also I was too lazy to parse the syntax with hnix.
+The second require extra facilities so the tool will execute them individually, passing them the attribute paths to check, the corresponding file paths, and (if available) build logs. They can be arbitrary programs so they can do as they please – for example, parse the code into [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree), read build logs, inspect the build output or even access network.
 
 ## License
 

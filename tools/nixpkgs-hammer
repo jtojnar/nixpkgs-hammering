@@ -122,10 +122,6 @@ def concatenate_messages(
     return dict(result)
 
 
-def escape_nix_string(val: str) -> str:
-    return '"' + val.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-
 def escape_attr(attr: str) -> str:
     return ".".join(f'"{section}"' for section in attr.split("."))
 
@@ -236,13 +232,9 @@ def main(args):
     overlay_generators_path = (script_dir.parent / "overlays").absolute()
     lib_dir = (script_dir.parent / "lib").absolute()
 
-    attrs_nix = []
     attr_messages = []
-    name_positions = []
 
     for attr in args.attr_paths:
-        attrs_nix.append(escape_nix_string(attr))
-
         attr_messages.append(
             textwrap.dedent(
                 f"""
@@ -296,19 +288,6 @@ def main(args):
             )
         )
 
-        name_position = textwrap.dedent(
-            f"""
-            let
-                result = builtins.tryEval cleanPkgs.{escape_attr(attr)} or null;
-            in
-                if result.success && result.value != null then
-                    result.value.meta.position or null
-                else
-                    null
-            """
-        )
-        name_positions.append("(" + name_position.strip() + ")")
-
     # Our overlays need to know the built attributes so that they can check only them.
     # We do it by using functions that return overlays so we need to instantiate them.
     overlay_expressions = []
@@ -317,34 +296,21 @@ def main(args):
             continue
 
         overlay = overlay_generator.name
-        overlay_expressions.append(
-            textwrap.dedent(
-                f"""
-                (import {overlay_generators_path}/{overlay} {{
-                    inherit builtAttrs packageSet namePositions;
-                }})
-                """
-            )
-        )
+        overlay_expressions.append(f"(import {overlay_generators_path}/{overlay})")
 
-    name_positions_nix = (
-        "[\n" + indent("\n".join(name_positions)) + "\n]" if name_positions else "[ ]"
-    )
     attr_messages_nix = (
         "{\n" + indent("".join(attr_messages)) + "\n}" if attr_messages else "{ }"
     )
     overlays_nix = (
         "[\n" + indent("".join(overlay_expressions)) + "\n]"
-        if name_positions
+        if overlay_expressions
         else "[ ]"
     )
     all_messages_nix = textwrap.dedent(
         f"""
         let
-            builtAttrs = [ {" ".join(attrs_nix)} ];
             packageSet = {args.nix_file};
             cleanPkgs = import packageSet {{ }};
-            namePositions = builtins.filter (p: p != null) {indent(name_positions_nix, 2 + 1).strip()};
 
             pkgs = import packageSet {{
                 overlays = {indent(overlays_nix, 2 + 2).strip()};

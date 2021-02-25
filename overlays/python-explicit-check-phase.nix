@@ -1,8 +1,3 @@
-{ builtAttrs
-, packageSet
-, namePositions
-}@attrs:
-
 final: prev:
 let
   inherit (prev) lib;
@@ -21,4 +16,4 @@ let
       ];
     };
 in
-  checkBuildPythonPackageFor checkDerivation attrs final prev
+  checkBuildPythonPackageFor checkDerivation final prev
