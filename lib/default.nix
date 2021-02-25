@@ -61,45 +61,48 @@ rec {
       };
     };
 
-    # Creates an overlay that replaces buildPythonPackage with a function that
-    # checks the attribute set passed as argument
-    checkBuildPythonPackageFor =
-      check:
+  # Creates an overlay that replaces buildPythonPackage with a function that
+  # checks the attribute set passed as argument to it.
+  checkBuildPythonPackageFor =
+    check:
 
-      final:
-      prev:
+    final:
+    prev:
 
-      let
-        # Keep in sync with Nixpkgs’s all-packages.nix.
-        pythonPackageSetNames = [
-          "python"
-          "python2"
-          "python3"
-          "pypy"
-          "pypy2"
-          "pypy3"
-          "python27"
-          "python36"
-          "python37"
-          "python38"
-          "python39"
-          "python310"
-          "python3Minimal"
-          "pypy27"
-          "pypy36"
-        ];
+    let
+      # Keep in sync with Nixpkgs’s all-packages.nix.
+      pythonPackageSetNames = [
+        "python"
+        "python2"
+        "python3"
+        "pypy"
+        "pypy2"
+        "pypy3"
+        "python27"
+        "python36"
+        "python37"
+        "python38"
+        "python39"
+        "python310"
+        "python3Minimal"
+        "pypy27"
+        "pypy36"
+      ];
 
-      in
-        lib.genAttrs pythonPackageSetNames (pythonName:
-          prev.${pythonName}.override (oldOverrides: {
-            packageOverrides = lib.composeExtensions (oldOverrides.packageOverrides or idOverlay) (final: prev: {
-              buildPythonPackage = wrapFunctionWithChecks prev.buildPythonPackage check;
-            });
-          }));
+    in
+      lib.genAttrs pythonPackageSetNames (pythonName:
+        prev.${pythonName}.override (oldOverrides: {
+          packageOverrides = lib.composeExtensions (oldOverrides.packageOverrides or idOverlay) (final: prev: {
+            buildPythonPackage = wrapFunctionWithChecks prev.buildPythonPackage check;
+          });
+        })
+      );
 
-    checkFor = check:
-      let
-        o1 = (checkMkDerivationFor check);
-        o2 = (checkBuildPythonPackageFor check);
-      in lib.composeExtensions o1 o2;
+  # Creates an overlay that replaces all supported functions for creating derivations
+  # with a function that checks the attribute set passed as argument to it.
+  checkFor = check:
+    let
+      o1 = (checkMkDerivationFor check);
+      o2 = (checkBuildPythonPackageFor check);
+    in lib.composeExtensions o1 o2;
 }
