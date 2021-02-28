@@ -75,19 +75,20 @@ def run_external_checks(
     encoded_attrs = json.dumps(attrs, cls=JSONEncoder)
     result: Dict[Attr, List[Report]] = defaultdict(list)
 
-    names_without_outputs = [
-        a.name for a in attrs if a.output is None or not a.output.exists()
-    ]
-    for name in names_without_outputs:
-        result[name].append(
-            Report(
-                name="no-build-output",
-                msg=f"‘{name}’ has not yet been built. Checks that rely on the presence of build logs are skipped.",
-                link=False,
-                locations=[],
-                severity="notice",
+    if "no-build-output" not in excluded_rules:
+        names_without_outputs = [
+            a.name for a in attrs if a.output is None or not a.output.exists()
+        ]
+        for name in names_without_outputs:
+            result[name].append(
+                Report(
+                    name="no-build-output",
+                    msg=f"‘{name}’ has not yet been built. Checks that rely on the presence of build logs are skipped.",
+                    link=False,
+                    locations=[],
+                    severity="notice",
+                )
             )
-        )
 
     for rule in rules:
         try:
