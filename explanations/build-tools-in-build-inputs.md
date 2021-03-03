@@ -1,9 +1,10 @@
-The following packages are primarily build tools so they likely go to `nativeBuildInputs`, not `buildInputs`:
+The following packages are tools primarily used during build so they likely go to `nativeBuildInputs`, not `buildInputs`:
 
 - `cmake`
 - `meson`
 - `ninja`
 - `pkg-config`
+- and [more](https://github.com/jtojnar/nixpkgs-hammering/blob/master/overlays/build-tools-in-build-inputs.nix)…
 
 The distinction primarily matters when [cross-compiling](https://nixos.org/nixpkgs/manual/#chap-cross) a package for a different architecture than the one the build runs on – if you want to run a program during a package’s build, its _host_ (runtime) architecture needs to match the package’s _build_ architecture, or the operating system might not be able to execute it.
 

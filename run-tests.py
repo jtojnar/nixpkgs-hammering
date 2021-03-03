@@ -121,6 +121,7 @@ class TestSuite(unittest.TestSuite):
                 "meson",
                 "ninja",
                 "pkg-config",
+                "sphinx",
             ],
         )
 
