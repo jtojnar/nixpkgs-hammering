@@ -50,6 +50,7 @@
     name = "environment variables";
     values = [
       "CFLAGS"
+      "CPPFLAGS"
       "CXXFLAGS"
       "FONTCONFIG_FILE"
       "NIX_CFLAGS_COMPILE"
