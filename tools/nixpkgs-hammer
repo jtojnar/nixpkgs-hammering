@@ -236,6 +236,8 @@ def main(args):
     overlay_generators_path = (script_dir.parent / "overlays").absolute()
     lib_dir = (script_dir.parent / "lib").absolute()
 
+    try_eval = "(value: { inherit value; success = true; })" if args.do_not_catch_errors else "builtins.tryEval"
+
     attr_messages = []
 
     for attr in args.attr_paths:
@@ -244,8 +246,8 @@ def main(args):
                 f"""
                 "{attr}" =
                   let
-                    result = builtins.tryEval pkgs.{escape_attr(attr)} or null;
-                    maybeReport = builtins.tryEval (result.value.__nixpkgs-hammering-state.reports or []);
+                    result = {try_eval} pkgs.{escape_attr(attr)} or null;
+                    maybeReport = {try_eval} (result.value.__nixpkgs-hammering-state.reports or []);
                   in
                     if !(result.success && maybeReport.success) then
                       {{
@@ -374,6 +376,12 @@ if __name__ == "__main__":
         dest="show_trace",
         action="store_true",
         help="show trace when error occurs",
+    )
+    parser.add_argument(
+        "--do-not-catch-errors",
+        dest="do_not_catch_errors",
+        action="store_true",
+        help="avoid catching evaluation errors (for debugging)",
     )
     parser.add_argument(
         "--json",
