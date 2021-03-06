@@ -55,7 +55,6 @@ let
     "lit"
     "lld"
     "llvm"
-    "makeSetupHook"
     "makeWrapper"
     "man"
     "maven"
