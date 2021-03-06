@@ -80,6 +80,7 @@
       "dontUseNinjaInstall"
       "dontFixup"
       "dontUseNinjaCheck"
+      "dontNpmInstall"
     ];
   }
 
