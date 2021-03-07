@@ -8,12 +8,16 @@ let
       name = "python-include-tests";
       cond =
         let
-          hasCheckPhase = drvArgs ? checkPhase;
-          hasDoCheckFalse = (drvArgs ? doCheck) && (drvArgs.doCheck == false);
-          hasPytestCheckHook = drvArgs ? checkInputs && lib.any (n: (n.name or "") == "pytest-check-hook") drvArgs.checkInputs;
+          isTestHook = name: builtins.elem name [
+            "pytest-check-hook"
+            "setuptools-check-hook"
+          ];
+          hasCheckPhase = drvArgs ? checkPhase || drvArgs ? installCheckPhase;
+          hasDoCheckFalse = (drv ? doInstallCheck) && !drv.doInstallCheck;
+          hasCheckHook = lib.any (n: isTestHook (n.name or "")) drv.nativeBuildInputs;
           hasPythonImportsCheck = drvArgs ? pythonImportsCheck;
 
-          hasActiveCheckPhase = (hasCheckPhase || hasPytestCheckHook) && (!hasDoCheckFalse);
+          hasActiveCheckPhase = (hasCheckPhase || hasCheckHook) && (!hasDoCheckFalse);
         in
           !(hasActiveCheckPhase || hasPythonImportsCheck);
       msg = ''
