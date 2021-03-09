@@ -52,6 +52,7 @@
       "CFLAGS"
       "CPPFLAGS"
       "CXXFLAGS"
+      "FCFLAGS"
       "FONTCONFIG_FILE"
       "NIX_CFLAGS_COMPILE"
       "NIX_CFLAGS_LINK"
