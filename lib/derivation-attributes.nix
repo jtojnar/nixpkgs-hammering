@@ -17,6 +17,7 @@
       "propagatedNativeBuildInputs"
       "propagatedBuildInputs"
       "checkInputs"
+      "checkPlugins"
       "installCheckInputs"
     ];
   }
