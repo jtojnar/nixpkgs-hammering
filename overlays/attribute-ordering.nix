@@ -42,6 +42,7 @@ let
         let
           fstInfo = preferredOrdering.${fst};
           sndInfo = preferredOrdering.${snd};
+          sameGroup = fstInfo.group == sndInfo.group;
         in {
           name = "attribute-ordering";
           cond =
@@ -50,7 +51,7 @@ let
             # This means we will not be able to detect if they are out of order and have to skip them.
             getAttrPos fst != getAttrPos snd;
           msg = ''
-            The ${lib.optionalString (sndInfo.group != null) "${sndInfo.group}, including the "}attribute “${snd}” should preferably come before ${lib.optionalString (fstInfo.group != null) "${fstInfo.group}’ "}“${fst}” attribute in the expression.
+            The ${lib.optionalString (sndInfo.group != null && !sameGroup) "${sndInfo.group}, including the "}attribute “${snd}” should preferably come before ${lib.optionalString (fstInfo.group != null && !sameGroup) "${fstInfo.group}’ "}“${fst}” attribute ${lib.optionalString (sndInfo.group != null && sameGroup) "among ${sndInfo.group} "}in the expression.
           '';
           locations = [
             (builtins.unsafeGetAttrPos fst drvArgs)
