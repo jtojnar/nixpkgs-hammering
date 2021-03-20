@@ -10,7 +10,7 @@ pub struct Attr {
     pub output: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SourceLocation {
     pub file: String,
     pub line: usize,

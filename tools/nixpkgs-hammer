@@ -201,9 +201,12 @@ def render_code_location_ansi(loc: SourceLocation) -> str:
         line_spaces = " " * len(str(loc.line))
         column = loc.column if loc.column is not None else 1
         pointer = " " * (column - 1) + "^"
+        rendered_loc_parts = [loc.file, str(loc.line)]
+        if loc.column is not None:
+            rendered_loc_parts.append(str(loc.column))
 
         location_lines = [
-            f"Near {loc.file}:{loc.line}:{loc.column}:",
+            f"Near {':'.join(rendered_loc_parts)}:",
             line_spaces + " |",
             str(loc.line) + " | " + line_contents,
             line_spaces + " | " + pointer,

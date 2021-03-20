@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>> {
+fn analyze_single_file(log: BufReader<ChildStdout>, attr: &Attr) -> Result<Report, Box<dyn Error>> {
     let re = Regex::new(r"Ran 0 tests in \d+.\d+s").unwrap();
 
     let report = log
@@ -21,7 +21,7 @@ fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Er
         .map(|m| NixpkgsHammerMessage {
             msg: format!("Test runner could not discover any test cases: ‘{}’", m),
             name: "no-python-tests",
-            locations: vec![],
+            locations: attr.location.iter().map(|x| x.clone()).collect(),
             link: true,
         })
         .collect();
