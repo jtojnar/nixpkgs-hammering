@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>> {
+fn analyze_single_file(log: BufReader<ChildStdout>, attr: &Attr) -> Result<Report, Box<dyn Error>> {
     let re = Regex::new(
         r"substituteStream\(\): WARNING: pattern (.*?) doesn't match anything in file '(.*?)'",
     )
@@ -24,7 +24,7 @@ fn analyze_single_file(log: BufReader<ChildStdout>) -> Result<Report, Box<dyn Er
         .map(|m| NixpkgsHammerMessage {
             msg: format!("Stale substituteInPlace detected.\n{}", m),
             name: "stale-substitute",
-            locations: vec![],
+            locations: attr.location.iter().map(|x| x.clone()).collect(),
             link: true,
         })
         .collect();

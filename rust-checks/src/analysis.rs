@@ -8,7 +8,7 @@ use std::{collections::HashMap, error::Error, fs};
 
 pub type Report = Vec<NixpkgsHammerMessage>;
 pub type NixFileAnalyzer = fn(&Files<String>, FileId) -> Result<Report, Box<dyn Error>>;
-pub type LogFileAnalyzer = fn(BufReader<ChildStdout>) -> Result<Report, Box<dyn Error>>;
+pub type LogFileAnalyzer = fn(BufReader<ChildStdout>, &Attr) -> Result<Report, Box<dyn Error>>;
 
 /// Runs given analyzer the nix file for each attr
 pub fn analyze_nix_files(
@@ -49,8 +49,9 @@ pub fn analyze_log_files(
             .stdout(Stdio::piped())
             .spawn()?;
 
-        let out = BufReader::new(program.stdout.take().unwrap());
-        report.insert(attr.name.clone(), analyzer(out)?);
+        let logreader = BufReader::new(program.stdout.take().unwrap());
+        let checkresult = analyzer(logreader, &attr)?;
+        report.insert(attr.name.clone(), checkresult);
     }
 
     Ok(serde_json::to_string(&report)?)
