@@ -8,6 +8,20 @@ rec {
   filterReports = reports:
     map (report: builtins.removeAttrs report [ "cond" ]) (lib.filter ({ cond, ... }: cond) reports);
 
+  # Get the location of a drv. Return either an attset containing the fields 'file' and 'line'
+  # or null.
+  getLocation = drv:
+    let
+      position = drv.meta.position or null;
+      posSplit = builtins.split ":" position;
+    in
+      if position == null then
+        null
+      else {
+        file = builtins.elemAt posSplit 0;
+        line = lib.toInt (builtins.elemAt posSplit 2);
+      };
+
   capitalize = str:
     if builtins.stringLength str == 0 then
       str

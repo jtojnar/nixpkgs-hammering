@@ -1,7 +1,7 @@
 final: prev:
 let
   inherit (prev) lib;
-  inherit (import ../lib { inherit lib; }) checkBuildPythonPackageFor;
+  inherit (import ../lib { inherit lib; }) checkBuildPythonPackageFor getLocation;
 
   checkDerivation = drvArgs: drv:
     lib.singleton {
@@ -23,6 +23,7 @@ let
       msg = ''
         Consider adding a `checkPhase` for tests, or if not feasible, `pythonImportsCheck`.
       '';
+      locations = [ (getLocation drv) ];
     };
 in
   checkBuildPythonPackageFor checkDerivation final prev
