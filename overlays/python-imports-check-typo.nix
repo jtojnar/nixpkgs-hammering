@@ -16,7 +16,7 @@ let
         name = "python-imports-check-typo";
         cond = builtins.hasAttr incorrectSpelling drvArgs;
         msg = ''
-          A typo in `pythonImportsCheck` was found.
+          A likely typo in the `${incorrectSpelling}` argument was found. Did you mean `pythonImportsCheck`?
         '';
         locations = [
           (builtins.unsafeGetAttrPos incorrectSpelling drvArgs)
