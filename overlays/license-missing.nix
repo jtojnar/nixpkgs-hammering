@@ -8,7 +8,7 @@ let
       name = "license-missing";
       cond = lib.length (lib.toList (drvArgs.meta.license or [ ])) == 0;
       msg = ''
-        Package is missing a license
+        Package is missing a license.
       '';
       locations = [
         (builtins.head (builtins.filter (l: l != null) [

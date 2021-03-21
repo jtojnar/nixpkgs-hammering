@@ -17,7 +17,7 @@ let
         in
           !(hasActiveCheckPhase || hasPythonImportsCheck);
       msg = ''
-        Add a `checkPhase` for tests, or at least `pythonImportsCheck`.
+        Consider adding a `checkPhase` for tests, or if not feasible, `pythonImportsCheck`.
       '';
     };
 in

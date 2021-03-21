@@ -77,7 +77,7 @@ let
             # Comment out the following line to see all unknown attributes (when extending our lexicon).
             cond = builtins.length suggestions > 0;
             msg = ''
-              A likely typo in `${argName}` argument was found${prettySuggestions suggestions}
+              A likely typo in the `${argName}` argument was found${prettySuggestions suggestions}
             '';
             locations = [
               (builtins.unsafeGetAttrPos argName drvArgs)
