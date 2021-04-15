@@ -100,7 +100,6 @@ let
     "xcodebuild"
     "xmlto"
     "xvfb_run"
-    "yacc"
     "yarn"
     "zip"
   ] ++ lib.optionals (prev.stdenv.isDarwin) [
