@@ -201,6 +201,17 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            "name-and-version",
+            [
+                "positive",
+            ],
+            [
+                "negative",
+                "everything",
+            ]
+        )
+
+        yield make_test_rule(
             "no-flags-array",
             [
                 "make",
