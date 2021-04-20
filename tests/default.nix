@@ -15,6 +15,7 @@
   meson-cmake = pkgs.callPackage ./meson-cmake { };
   missing-patch-comment = pkgs.recurseIntoAttrs (pkgs.callPackage ./missing-patch-comment { });
   missing-phase-hooks = pkgs.recurseIntoAttrs (pkgs.callPackage ./missing-phase-hooks { });
+  name-and-version = pkgs.recurseIntoAttrs (pkgs.callPackage ./name-and-version { });
   no-flags-array = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-flags-array { });
   no-flags-spaces = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-flags-spaces { });
   no-python-tests = pkgs.recurseIntoAttrs (pkgs.python3.pkgs.callPackage ./no-python-tests { });
