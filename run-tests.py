@@ -171,10 +171,12 @@ class TestSuite(unittest.TestSuite):
             "missing-patch-comment",
             [
                 "missing-comment",
+                "comment-after-newline",
             ],
             [
                 "general-comment",
                 "comment-above",
+                "comment-inline",
                 "comment-within",
                 "complex-structure1",
                 "ignore-nested-lists1",

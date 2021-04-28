@@ -1,6 +1,6 @@
 use codespan::{FileId, Files};
 use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within};
+use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within, find_comment_after};
 use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation, Attr};
 use nixpkgs_hammering_ast_checks::tree_utils::{parents, walk_keyvalues_filter_key, walk_kind};
 use rnix::{types::*, SyntaxKind::*};
@@ -76,8 +76,10 @@ fn process_patch_list(
     for item in patchlist.items() {
         let has_comment_above = find_comment_above(&item).is_some();
         let has_comment_within = find_comment_within(&item).is_some();
+        let has_comment_after = find_comment_after(&item).is_some();
+        let has_comment = has_comment_above || has_comment_within || has_comment_after;
 
-        if !(has_comment_above || has_comment_within) {
+        if !has_comment {
             let start = item.text_range().start().to_usize() as u32;
 
             report.push(NixpkgsHammerMessage {
