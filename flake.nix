@@ -17,44 +17,52 @@
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-compat, naersk, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
-    pkgs = import nixpkgs { inherit system; };
-    naersk-lib = naersk.lib."${system}";
-  in rec {
+  outputs = { self, flake-compat, naersk, nixpkgs, utils }: {
+    overlay = final: prev: {
+      nixpkgs-hammer =
+        let
+          naersk-lib = prev.callPackage naersk {};
 
-    packages.rust-checks = naersk-lib.buildPackage {
-      name = "rust-checks";
-      root = ./rust-checks;
-    };
+          rust-checks = naersk-lib.buildPackage {
+            name = "rust-checks";
+            root = ./rust-checks;
+          };
 
-    packages.nixpkgs-hammer =
-      let
-        # Find all of the binaries installed by rust-checks. Note, if this changes
-        # in the future to use wrappers or something else that pollute the bin/
-        # directory, this logic will have to grow.
-        rust-check-names = let
-          binContents = builtins.readDir "${packages.rust-checks}/bin";
+          # Find all of the binaries installed by rust-checks. Note, if this changes
+          # in the future to use wrappers or something else that pollute the bin/
+          # directory, this logic will have to grow.
+          rust-check-names = let
+            binContents = builtins.readDir "${rust-checks}/bin";
+          in
+            prev.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
         in
-          pkgs.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
-      in
-        pkgs.runCommand "nixpkgs-hammer" {
-          buildInputs = with pkgs; [
-            python3
-            makeWrapper
-          ];
-        } ''
-          install -D ${./tools/nixpkgs-hammer} $out/bin/$name
-          patchShebangs $out/bin/$name
+          prev.runCommand "nixpkgs-hammer" {
+            buildInputs = with prev; [
+              python3
+              makeWrapper
+            ];
 
-          wrapProgram "$out/bin/$name" \
-              --prefix PATH ":" ${pkgs.lib.makeBinPath [
-                pkgs.nixUnstable
-                packages.rust-checks
-              ]} \
-              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" rust-check-names}
-          ln -s ${./overlays} $out/overlays
-          ln -s ${./lib} $out/lib
-        '';
+            passthru = {
+              inherit rust-checks;
+            };
+          } ''
+            install -D ${./tools/nixpkgs-hammer} $out/bin/$name
+            patchShebangs $out/bin/$name
+
+            wrapProgram "$out/bin/$name" \
+                --prefix PATH ":" ${prev.lib.makeBinPath [
+                  prev.nixUnstable
+                  rust-checks
+                ]} \
+                --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names}
+            ln -s ${./overlays} $out/overlays
+            ln -s ${./lib} $out/lib
+          '';
+    };
+  } // utils.lib.eachDefaultSystem (system: let
+    pkgs = import nixpkgs { inherit system; };
+  in rec {
+    packages.nixpkgs-hammer = (self.overlay pkgs pkgs).nixpkgs-hammer;
 
     defaultPackage = self.packages.${system}.nixpkgs-hammer;
 
