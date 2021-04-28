@@ -19,7 +19,7 @@
 
   outputs = { self, flake-compat, naersk, nixpkgs, utils }: {
     overlay = final: prev: {
-      nixpkgs-hammer =
+      nixpkgs-hammering =
         let
           naersk-lib = prev.callPackage naersk {};
 
@@ -36,7 +36,7 @@
           in
             prev.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
         in
-          prev.runCommand "nixpkgs-hammer" {
+          prev.runCommand "nixpkgs-hammering" {
             buildInputs = with prev; [
               python3
               makeWrapper
@@ -46,10 +46,10 @@
               inherit rust-checks;
             };
           } ''
-            install -D ${./tools/nixpkgs-hammer} $out/bin/$name
-            patchShebangs $out/bin/$name
+            install -D ${./tools/nixpkgs-hammer} $out/bin/nixpkgs-hammer
+            patchShebangs $out/bin/nixpkgs-hammer
 
-            wrapProgram "$out/bin/$name" \
+            wrapProgram "$out/bin/nixpkgs-hammer" \
                 --prefix PATH ":" ${prev.lib.makeBinPath [
                   prev.nixUnstable
                   rust-checks
@@ -62,11 +62,11 @@
   } // utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
   in rec {
-    packages.nixpkgs-hammer = (self.overlay pkgs pkgs).nixpkgs-hammer;
+    packages.nixpkgs-hammering = (self.overlay pkgs pkgs).nixpkgs-hammering;
 
-    defaultPackage = self.packages.${system}.nixpkgs-hammer;
+    defaultPackage = self.packages.${system}.nixpkgs-hammering;
 
-    apps.nixpkgs-hammer = utils.lib.mkApp { drv = self.packages.${system}.nixpkgs-hammer; };
+    apps.nixpkgs-hammer = utils.lib.mkApp { drv = self.packages.${system}.nixpkgs-hammering; };
 
     defaultApp = self.apps.${system}.nixpkgs-hammer;
 
