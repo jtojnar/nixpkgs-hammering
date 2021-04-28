@@ -57,7 +57,25 @@
         "flake-compat": "flake-compat",
         "naersk": "naersk",
         "nixpkgs": "nixpkgs",
+        "traceFd": "traceFd",
         "utils": "utils"
+      }
+    },
+    "traceFd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1614104713,
+        "narHash": "sha256-6EwPNqMiC9HKtl+Zl2rhmvaV7c+QxNcceWjXaOsePMQ=",
+        "owner": "rmcgibbo",
+        "repo": "nix-traceFd",
+        "rev": "073cebc0d64472edb2e4f519d6b4f4ea58b7360a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rmcgibbo",
+        "ref": "master",
+        "repo": "nix-traceFd",
+        "type": "github"
       }
     },
     "utils": {

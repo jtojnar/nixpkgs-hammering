@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
+import concurrent.futures
 import io
 import json
 import os
+import re
 import subprocess
 import sys
+import tempfile
 import textwrap
-from collections import defaultdict
+import urllib.request
+from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field, is_dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
@@ -113,6 +117,65 @@ def run_external_checks(
     return dict(result)
 
 
+def run_fetchurl_checks(
+    fetchurl_calls: List[Dict[str, Any]], excluded_rules: List[str]
+) -> Dict[str, Report]:
+
+    if "out-of-repo-commit" in excluded_rules:
+        return {}
+
+    github_fetch = namedtuple("github_fetch", ["url", "owner", "repo", "sha"])
+
+    def github_commit_fetches() -> Iterable[github_fetch]:
+        for call in fetchurl_calls:
+            url = call.get("url", "")
+            if not isinstance(url, str):
+                continue
+            m1 = re.search(
+                r"github\.com/(.*)/(.*)/(?:archive|commit|pull/\d+/commits)/(.{40})\.",
+                url,
+            )
+            if m1 is not None:
+                yield (url,) + m1.groups()
+
+    def _fetch_data(url: str, owner: str, repo: str, sha: str) -> Tuple[str, str]:
+        branch_commit_url = f"https://github.com/{owner}/{repo}/branch_commits/{sha}"
+        try:
+            resp = urllib.request.urlopen(branch_commit_url, timeout=20)
+            if resp.status != 200:
+                return None
+            return (url, resp.read())
+        except urllib.error.HTTPError:
+            return None
+
+    github_responses = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_url = (
+            executor.submit(_fetch_data, *value) for value in github_commit_fetches()
+        )
+        for future in concurrent.futures.as_completed(future_to_url):
+            github_responses.append(future.result())
+
+    reports = []
+    for url, response in github_responses:
+        if b"This commit does not belong to any branch on this repository." in response:
+            reports.append(
+                Report(
+                    name="out-of-repo-commit",
+                    msg=textwrap.dedent(
+                        f"""
+                            The dependency chain for these expressions includes {url},
+                            which references a commit which does not belong to any
+                            branch on this repository, and is in fact associated with
+                            a fork of this repository.
+                        """
+                    ).strip(),
+                    locations=[],
+                )
+            )
+    return {"<unknown>": reports}
+
+
 def concatenate_messages(
     *report_sources: Dict[str, List[Report]]
 ) -> Dict[Attr, List[Report]]:
@@ -127,13 +190,30 @@ def escape_attr(attr: str) -> str:
     return ".".join(f'"{section}"' for section in attr.split("."))
 
 
-def nix_eval_json(expr: str, show_trace: bool = False) -> Dict[Attr, List[Report]]:
+def nix_eval_json(
+    expr: str, show_trace: bool = False
+) -> Tuple[Dict[Optional[Attr], List[Report]], List[Dict[str, Any]]]:
     args = ["nix-instantiate", "--strict", "--json", "--eval", "-"]
+    if "NIX_PLUGINS" in os.environ:
+        args.extend(["--option", "plugin-files"] + os.environ["NIX_PLUGINS"].split(":"))
 
     if show_trace:
         args.append("--show-trace")
 
-    json_text = subprocess.check_output(args, text=True, input=expr)
+    with tempfile.TemporaryFile() as fetchurl_calls_file:
+        fileno = fetchurl_calls_file.fileno()
+        json_text = subprocess.check_output(
+            args,
+            text=True,
+            input=expr,
+            env=dict(**os.environ, FETCHURL_TRACEFD=str(fileno)),
+            pass_fds=(fileno,),
+        )
+        fetchurl_calls_file.seek(0)
+        fetchurl_calls = [
+            json.loads(line)
+            for line in fetchurl_calls_file.read().decode("utf-8").splitlines()
+        ]
 
     def maybe_path(s: Optional[str]) -> Optional[Path]:
         if s:
@@ -155,8 +235,7 @@ def nix_eval_json(expr: str, show_trace: bool = False) -> Dict[Attr, List[Report
             location=maybe_location(data["location"]),
         )
         result[attr] = load_reports(data["report"])
-
-    return result
+    return result, fetchurl_calls
 
 
 def load_reports(report_datas: List[Dict[str, Any]]) -> List[Report]:
@@ -295,7 +374,7 @@ def main(args):
     # Our overlays need to know the built attributes so that they can check only them.
     # We do it by using functions that return overlays so we need to instantiate them.
     overlay_expressions = []
-    for overlay_generator in overlay_generators_path.glob("*"):
+    for overlay_generator in sorted(overlay_generators_path.glob("*")):
         if overlay_generator.stem in args.excluded_rules:
             continue
 
@@ -326,12 +405,17 @@ def main(args):
     if args.show_trace:
         print("Nix expression:", all_messages_nix, file=sys.stderr)
 
-    overlay_data = nix_eval_json(all_messages_nix, args.show_trace)
+    overlay_data, fetchurl_calls = nix_eval_json(all_messages_nix, args.show_trace)
     overlay_reports = {attr.name: reports for attr, reports in overlay_data.items()}
     external_reports = run_external_checks(
-        list(overlay_data.keys()), args.excluded_rules
+        list(attr for attr in overlay_data.keys() if attr is not None),
+        args.excluded_rules,
     )
-    all_messages = concatenate_messages(overlay_reports, external_reports)
+    fetchurl_reports = run_fetchurl_checks(fetchurl_calls, args.excluded_rules)
+
+    all_messages = concatenate_messages(
+        overlay_reports, external_reports, fetchurl_reports
+    )
 
     if args.json:
         print(json.dumps(all_messages, cls=JSONEncoder))

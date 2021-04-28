@@ -12,15 +12,23 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    traceFd = {
+      url = "github:rmcgibbo/nix-traceFd/master";
+      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-compat, naersk, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let
+  outputs = { self, flake-compat, naersk, nixpkgs, utils, traceFd }: utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
     naersk-lib = naersk.lib."${system}";
   in rec {
+
+    traceFdBuilt = pkgs.callPackage traceFd {};
 
     packages.rust-checks = naersk-lib.buildPackage {
       name = "rust-checks";
@@ -51,7 +59,8 @@
                 pkgs.nixUnstable
                 packages.rust-checks
               ]} \
-              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" rust-check-names}
+              --set AST_CHECK_NAMES ${pkgs.lib.concatStringsSep ":" rust-check-names} \
+              --set NIX_PLUGINS ${traceFdBuilt}/lib/nix/plugins/libtraceFd.so
           ln -s ${./overlays} $out/overlays
           ln -s ${./lib} $out/lib
         '';
