@@ -44,6 +44,7 @@
 
             passthru = {
               inherit rust-checks;
+              exePath = "/bin/nixpkgs-hammer";
             };
           } ''
             install -D ${./tools/nixpkgs-hammer} $out/bin/nixpkgs-hammer
