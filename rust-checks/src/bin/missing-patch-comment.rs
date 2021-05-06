@@ -84,7 +84,7 @@ fn process_patch_list(
 
             report.push(NixpkgsHammerMessage {
                 msg:
-                    "Please add a comment on the line above, explaining the purpose of this patch."
+                    "Consider add a comment on the line above explaining the purpose of this patch."
                         .to_string(),
                 name: "missing-patch-comment",
                 locations: vec![SourceLocation::from_byte_index(files, file_id, start)?],
