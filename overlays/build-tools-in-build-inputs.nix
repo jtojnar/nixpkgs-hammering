@@ -81,7 +81,6 @@ let
     "python3.pkgs.setuptools-scm"
     "python2.pkgs.setuptools-scm-git-archive"
     "python3.pkgs.setuptools-scm-git-archive"
-    "python2.pkgs.sphinx"
     "python3.pkgs.sphinx"
     "python2.pkgs.wrapPython"
     "python3.pkgs.wrapPython"
@@ -99,7 +98,7 @@ let
     "xcbuildHook"
     "xcodebuild"
     "xmlto"
-    "xvfb_run"
+    "xvfb-run"
     "yarn"
     "zip"
   ] ++ lib.optionals (prev.stdenv.isDarwin) [
