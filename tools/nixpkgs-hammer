@@ -308,7 +308,7 @@ def main(args):
         "{\n" + indent("".join(attr_messages)) + "\n}" if attr_messages else "{ }"
     )
     overlays_nix = (
-        "[\n" + indent("".join(overlay_expressions)) + "\n]"
+        "[\n" + indent("\n".join(overlay_expressions)) + "\n]"
         if overlay_expressions
         else "[ ]"
     )
