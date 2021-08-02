@@ -8,7 +8,7 @@ This repository contains a bunch of [overlays](https://nixos.org/nixpkgs/manual/
 
 ## How do I use this?
 
-Run the following command in your nixpkgs directory:
+Run the following command in your nixpkgs directory when you use stable Nix:
 
 ```
 nix run -f https://github.com/jtojnar/nixpkgs-hammering/archive/master.tar.gz -c nixpkgs-hammer <attr-path>...
@@ -18,6 +18,12 @@ or with Flakes-enabled Nix:
 
 ```
 nix run github:jtojnar/nixpkgs-hammering <attr-path>...
+```
+
+or when you use unstable Nix but do not have Flakes enabled:
+
+```
+nix shell -f https://github.com/jtojnar/nixpkgs-hammering/archive/master.tar.gz -c nixpkgs-hammer <attr-path>...
 ```
 
 ## How does this work?
