@@ -355,13 +355,28 @@ if __name__ == "__main__":
         prog="nixpkgs-hammer",
         description="check package expressions for common mistakes",
     )
+
+    def absolutize(p: str) -> Path:
+        if p.startswith("<") and p.endswith(">"):
+            path = subprocess.check_output([
+                "nix",
+                "--experimental-features",
+                "nix-command",
+                "eval",
+                "--impure",
+                "--expr",
+                p
+            ], text=True)
+            return Path(path.strip())
+        return Path(p).resolve(strict=True)
+
     parser.add_argument(
         "-f",
         "--file",
         dest="nix_file",
         metavar="FILE",
         # Absolutize so we can refer to it from Nix.
-        type=lambda p: Path(p).resolve(strict=True),
+        type=absolutize,
         # Nix defaults to current directory when file not specified.
         default=Path.cwd(),
         help=(
