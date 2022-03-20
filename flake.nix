@@ -52,7 +52,7 @@
 
             wrapProgram "$out/bin/nixpkgs-hammer" \
                 --prefix PATH ":" ${prev.lib.makeBinPath [
-                  prev.nixUnstable
+                  prev.nixVersions.stable or prev.nixUnstable
                   rust-checks
                 ]} \
                 --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names}
