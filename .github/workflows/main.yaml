@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install Nix
-      uses: cachix/install-nix-action@v12
+      uses: cachix/install-nix-action@v16
 
     - name: Run tests
-      run: nix run -c ./run-tests.py
+      run: nix shell -c ./run-tests.py
