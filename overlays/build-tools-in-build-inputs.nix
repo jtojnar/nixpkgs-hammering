@@ -10,7 +10,6 @@ let
     "autoconf"
     "autogen"
     "automake"
-    "automoc4"
     "autoreconfHook"
     "bazel"
     "bc"
