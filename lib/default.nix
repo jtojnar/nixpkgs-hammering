@@ -107,6 +107,7 @@ rec {
       lib.genAttrs pythonPackageSetNames (pythonName:
         prev.${pythonName}.override (oldOverrides: {
           packageOverrides = lib.composeExtensions (oldOverrides.packageOverrides or idOverlay) (final: prev: {
+            buildPythonApplication = wrapFunctionWithChecks prev.buildPythonApplication check;
             buildPythonPackage = wrapFunctionWithChecks prev.buildPythonPackage check;
           });
         })
