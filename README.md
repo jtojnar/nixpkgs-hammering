@@ -34,6 +34,17 @@ The first kind can be expressed directly in Nix and they are implemented as Nixp
 
 The second require extra facilities so the tool will execute them individually, passing them the attribute paths to check, the corresponding file paths, and (if available) build logs. They can be arbitrary programs so they can do as they please – for example, parse the code into [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree), read build logs, inspect the build output or even access network.
 
+## How do I develop this?
+
+Run tests:
+
+```
+nix shell -c ./run-tests.py
+```
+
+> **Note**
+> The overlays of new checks must be added to the Git index in order for nixpkgs-hammering to discover them.
+
 ## License
 
 The code is licensed under [MIT](LICENSE.md), the explanations are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
