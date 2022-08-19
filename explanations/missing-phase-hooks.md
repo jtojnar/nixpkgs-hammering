@@ -29,3 +29,7 @@ Having phases run pre/post-phase hooks is important because many setup hooks ins
 ## Alternatives
 
 And if you just want to add a flag to `make` call, you might not even need to override the phases, see [`explicit-phases`](explicit-phases.md) rule.
+
+## See also
+
+- [Relevant Nixpkgs issue](https://github.com/NixOS/nixpkgs/issues/175605)
