@@ -10,7 +10,6 @@ Replace the deprecated unqualified in `meta.license` as follows:
 - `fdl11` by either `fdl11Only` or ~~`fdl11Plus`~~ (not currently used)
 - `fdl12` by either `fdl12Plus` or `fdl12Only`
 - `fdl13` by either `fdl13Plus` or `fdl13Only`
-- `gpl1` by either `gpl1Plus` or `gpl1Only`
 - `gpl2` by either `gpl2Plus` or `gpl2Only`
 - `gpl3` by either `gpl3Plus` or `gpl3Only`
 - `lgpl2` by either `lgpl2Plus` or `lgpl2Only`

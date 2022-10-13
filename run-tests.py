@@ -323,7 +323,6 @@ class TestSuite(unittest.TestSuite):
                 "fdl11",
                 "fdl12",
                 "fdl13",
-                "gpl1",
                 "gpl2",
                 "gpl3",
                 "lgpl2",
