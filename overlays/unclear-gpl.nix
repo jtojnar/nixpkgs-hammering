@@ -5,9 +5,6 @@ let
 
   licenses = [
     "agpl3"
-    "fdl11"
-    "fdl12"
-    "fdl13"
     "gpl2"
     "gpl3"
     "lgpl2"
