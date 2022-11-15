@@ -7,17 +7,12 @@
       flake = false;
     };
 
-    naersk = {
-      url = "github:nmattia/naersk";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-compat, naersk, nixpkgs, utils }: {
+  outputs = { self, flake-compat, nixpkgs, utils }: {
     overlays = {
       default =
         final:
@@ -26,11 +21,11 @@
         {
           nixpkgs-hammering =
             let
-              naersk-lib = prev.callPackage naersk {};
-
-              rust-checks = naersk-lib.buildPackage {
-                name = "rust-checks";
-                root = ./rust-checks;
+              rust-checks = prev.rustPlatform.buildRustPackage {
+                pname = "rust-checks";
+                version = (prev.lib.importTOML ./rust-checks/Cargo.toml).package.version;
+                src = ./rust-checks;
+                cargoLock.lockFile = ./rust-checks/Cargo.lock;
               };
 
               # Find all of the binaries installed by rust-checks. Note, if this changes
@@ -68,7 +63,7 @@
     };
   } // utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
-  in rec {
+  in {
     packages = rec {
       default = nixpkgs-hammering;
 
