@@ -1,0 +1,1 @@
+The python builder automatically sets `meta.platforms` to that of the interpreter, so the only reason to set it is to further limit the supported platforms to a subset of those supported by the python interpreter.

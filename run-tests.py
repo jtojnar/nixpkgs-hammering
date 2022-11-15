@@ -278,6 +278,19 @@ class TestSuite(unittest.TestSuite):
         )
 
         yield make_test_rule(
+            'python-unsupported-platforms',
+            [
+                'platforms-all',
+                "build-python-application-platforms-all",
+            ],
+            [
+                'platforms-linux',
+                'unspecified',
+                "build-python-application-platforms-linux",
+            ]
+        )
+
+        yield make_test_rule(
             "python-include-tests",
             [
                 "no-tests-no-import-checks",
@@ -291,9 +304,11 @@ class TestSuite(unittest.TestSuite):
             [
                 "mixed-1",
                 "mixed-2",
+                "build-python-application-mixed",
             ],
             [
                 "normal",
+                "build-python-application-normal",
             ],
         )
 
