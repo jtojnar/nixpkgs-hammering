@@ -39,6 +39,9 @@ stdenv.mkDerivation rec {
   propagatedBuildInputs = [
   ];
 
+  nativeCheckInputs = [
+  ];
+
   checkInputs = [
   ];
 
