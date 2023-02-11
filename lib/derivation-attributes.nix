@@ -16,6 +16,7 @@
       "buildInputs"
       "propagatedNativeBuildInputs"
       "propagatedBuildInputs"
+      "nativeCheckInputs"
       "checkInputs"
       "installCheckInputs"
     ];
@@ -69,7 +70,7 @@
       "doDist"
     ];
   }
-  
+
   {
     name = "attributes for disabling on-by-default phases";
     values = [
