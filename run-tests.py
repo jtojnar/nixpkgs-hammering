@@ -289,8 +289,8 @@ class TestSuite(unittest.TestSuite):
         yield make_test_rule(
             "python-inconsistent-interpreters",
             [
-                "mixed-1",
-                "mixed-2",
+                "mixed-checkInputs",
+                "mixed-propagatedBuildInputs",
             ],
             [
                 "normal",

@@ -4,8 +4,8 @@
 
 {
   # positive cases
-  mixed-1 = python3.pkgs.callPackage ./mixed-1.nix { };
-  mixed-2 = python3.pkgs.callPackage ./mixed-2.nix { };
+  mixed-checkInputs = python3.pkgs.callPackage ./mixed-checkInputs.nix { };
+  mixed-propagatedBuildInputs = python3.pkgs.callPackage ./mixed-propagatedBuildInputs.nix { };
 
   # negative cases
   normal = python3.pkgs.callPackage ./normal.nix { };

@@ -1,10 +1,11 @@
-{ buildPythonPackage
-, numpy
-, scipy
+{
+  buildPythonPackage,
+  numpy,
+  scipy,
 }:
 
 buildPythonPackage rec {
-  name = "package";
+  name = "mixed-normal";
 
   propagatedBuildInputs = [
     numpy
