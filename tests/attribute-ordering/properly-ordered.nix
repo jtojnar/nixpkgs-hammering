@@ -47,8 +47,10 @@ stdenv.mkDerivation rec {
   installFlags = [
   ];
 
-  FONTCONFIG_FILE = "";
-  NIX_CFLAGS_COMPILE = "";
+  env = {
+    FONTCONFIG_FILE = "";
+    NIX_CFLAGS_COMPILE = "";
+  };
 
   doCheck = true;
   doInstallCheck = true;

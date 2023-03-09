@@ -66,8 +66,10 @@ stdenv.mkDerivation rec {
   ];
 
   # Environment variables.
-  FONTCONFIG_FILE = "";
-  NIX_CFLAGS_COMPILE = "";
+  env = {
+    FONTCONFIG_FILE = "";
+    NIX_CFLAGS_COMPILE = "";
+  };
 
   # Enabling off-by-default phases.
   doCheck = true;

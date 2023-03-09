@@ -47,20 +47,7 @@
     ];
   }
 
-  {
-    name = "environment variables";
-    values = [
-      "CFLAGS"
-      "CPPFLAGS"
-      "CXXFLAGS"
-      "FCFLAGS"
-      "FONTCONFIG_FILE"
-      "NIX_CFLAGS_COMPILE"
-      "NIX_CFLAGS_LINK"
-      "NIX_ENFORCE_NO_NATIVE"
-      "NIX_LDFLAGS"
-    ];
-  }
+  "env"
 
   {
     name = "attributes for enabling off-by-default phases";
