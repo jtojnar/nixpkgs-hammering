@@ -130,6 +130,18 @@ class TestSuite(unittest.TestSuite):
         # )
 
         yield make_test_rule(
+            "environment-variables-go-to-env",
+            [
+                "env-var",
+                "pkg-config-var",
+            ],
+            [
+                "env-vars-just-in-env",
+                "no-env-vars",
+            ],
+        )
+
+        yield make_test_rule(
             "EvalError",
             [
                 "exception",
