@@ -1,6 +1,6 @@
 {
   buildPythonPackage,
-  python37Packages,
+  python311Packages,
   python39Packages,
 }:
 
@@ -8,7 +8,7 @@ buildPythonPackage rec {
   name = "python-inconsistent-interpreters--mixed-propagatedBuildInputs";
 
   propagatedBuildInputs = [
-    python37Packages.numpy
+    python311Packages.numpy
     python39Packages.scipy
   ];
 }
