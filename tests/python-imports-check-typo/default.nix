@@ -1,13 +1,14 @@
-{ callPackage
+{
+  python3,
 }:
 
 {
   # positive cases
-  pythonImportTests = callPackage ./pythonImportTests.nix { };
-  pythonImportCheck = callPackage ./pythonImportCheck.nix { };
-  pythonImportsTest = callPackage ./pythonImportsTest.nix { };
-  pythonCheckImports = callPackage ./pythonCheckImports.nix { };
+  pythonImportTests = python3.pkgs.callPackage ./pythonImportTests.nix { };
+  pythonImportCheck = python3.pkgs.callPackage ./pythonImportCheck.nix { };
+  pythonImportsTest = python3.pkgs.callPackage ./pythonImportsTest.nix { };
+  pythonCheckImports = python3.pkgs.callPackage ./pythonCheckImports.nix { };
 
   # negative cases
-  pythonImportsCheck = callPackage ./pythonImportsCheck.nix { };
+  pythonImportsCheck = python3.pkgs.callPackage ./pythonImportsCheck.nix { };
 }

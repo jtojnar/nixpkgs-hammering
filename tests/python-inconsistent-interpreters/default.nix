@@ -1,11 +1,12 @@
-{ callPackage
+{
+  python3,
 }:
 
 {
   # positive cases
-  mixed-1 = callPackage ./mixed-1.nix { };
-  mixed-2 = callPackage ./mixed-2.nix { };
+  mixed-1 = python3.pkgs.callPackage ./mixed-1.nix { };
+  mixed-2 = python3.pkgs.callPackage ./mixed-2.nix { };
 
   # negative cases
-  normal = callPackage ./normal.nix { };
+  normal = python3.pkgs.callPackage ./normal.nix { };
 }
