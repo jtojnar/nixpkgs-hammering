@@ -84,23 +84,21 @@ rec {
     prev:
 
     let
-      # Keep in sync with Nixpkgs’s all-packages.nix.
+      # Keep in sync with Nixpkgs’s all-packages.nix. Look for `inherit (pythonInterpreters)`.
+      # No need to include e.g. `python3`, since that is derived from one of the listed.
       pythonPackageSetNames = [
-        "python"
         "python2"
-        "python3"
-        "pypy"
-        "pypy2"
-        "pypy3"
-        "python27"
-        "python36"
-        "python37"
         "python38"
         "python39"
         "python310"
+        "python311"
+        "python312"
         "python3Minimal"
         "pypy27"
-        "pypy36"
+        "pypy39"
+        "pypy38"
+        "pypy37"
+        "rustpython"
       ];
 
     in
