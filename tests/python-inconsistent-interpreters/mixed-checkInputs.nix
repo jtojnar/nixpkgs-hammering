@@ -1,12 +1,12 @@
 {
   buildPythonPackage,
-  python27Packages,
+  python3Full,
 }:
 
 buildPythonPackage rec {
   name = "python-inconsistent-interpreters--mixed-checkInputs";
 
   checkInputs = [
-    python27Packages.numpy
+    python3Full.pkgs.numpy
   ];
 }
