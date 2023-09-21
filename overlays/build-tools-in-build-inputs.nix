@@ -67,7 +67,6 @@ let
     "patchelf"
     "pkg-config"
     "poetry"
-    "qmake4Hook"
     "qt5.wrapQtAppsHook"
     "ronn"
     "rpcsvc-proto"
