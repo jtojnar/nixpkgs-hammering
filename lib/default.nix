@@ -58,8 +58,15 @@ rec {
     let
       originalDrv = originalFunction args;
       namePosition = originalDrv.meta.position or null;
+      resolvedArgs =
+        if builtins.isFunction args then
+          # Resolve recursive attributes in mkDerivation
+          # https://nixos.org/manual/nixpkgs/stable/#mkderivation-recursive-attributes
+          lib.fix (finalAttrs: args finalAttrs // { finalPackage = originalDrv; })
+        else
+          args;
     in
-      addReports originalDrv (check args originalDrv);
+      addReports originalDrv (check resolvedArgs originalDrv);
 
   # Creates an overlay that replaces stdenv.mkDerivation with a function that
   # checks the attribute set passed as argument to mkDerivation.

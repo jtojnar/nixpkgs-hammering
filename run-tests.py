@@ -229,6 +229,7 @@ class TestSuite(unittest.TestSuite):
             "no-flags-array",
             [
                 "make",
+                "make-finalAttrs",
             ],
         )
 
