@@ -56,8 +56,8 @@
                       rust-checks
                     ]} \
                     --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names}
-                ln -s ${./overlays} $out/overlays
-                ln -s ${./lib} $out/lib
+                cp -r ${./overlays} $out/overlays
+                cp -r ${./lib} $out/lib
               '';
         };
     };
