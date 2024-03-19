@@ -75,7 +75,6 @@ let
     "rsync"
     "python3.pkgs.setuptools-git"
     "python3.pkgs.setuptools-scm"
-    "python3.pkgs.setuptools-scm-git-archive"
     "python3.pkgs.sphinx"
     "python3.pkgs.wrapPython"
     "squashfsTools"
