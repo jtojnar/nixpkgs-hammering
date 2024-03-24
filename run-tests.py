@@ -336,7 +336,6 @@ class TestSuite(unittest.TestSuite):
         yield make_test_rule(
             "unclear-gpl",
             [
-                "agpl3",
                 "gpl2",
                 "gpl3",
                 "lgpl2",

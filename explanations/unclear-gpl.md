@@ -6,7 +6,6 @@ To avoid this confusion, the unqualified GNU licenses were deprecated, in line w
 
 Replace the deprecated unqualified in `meta.license` as follows:
 
-- `agpl3` by either `agpl3Plus` or `agpl3Only`
 - `gpl2` by either `gpl2Plus` or `gpl2Only`
 - `gpl3` by either `gpl3Plus` or `gpl3Only`
 - `lgpl2` by either `lgpl2Plus` or `lgpl2Only`

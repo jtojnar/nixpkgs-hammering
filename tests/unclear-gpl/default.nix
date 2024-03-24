@@ -3,7 +3,6 @@
 
 {
   # positive cases
-  agpl3 = pkgs.callPackage ./agpl3.nix { };
   gpl2 = pkgs.callPackage ./gpl2.nix { };
   gpl3 = pkgs.callPackage ./gpl3.nix { };
   lgpl2 = pkgs.callPackage ./lgpl2.nix { };

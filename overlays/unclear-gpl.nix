@@ -4,7 +4,6 @@ let
   inherit (import ../lib { inherit lib; }) checkFor;
 
   licenses = [
-    "agpl3"
     "gpl2"
     "gpl3"
     "lgpl2"
@@ -16,7 +15,7 @@ let
     (map
       (license: {
         name = "unclear-gpl";
-        cond = lib.elem lib.licenses.${license} (lib.toList (drvArgs.meta.license or []));
+        cond = lib.elem lib.licenses.${license} (lib.toList (drvArgs.meta.license or [ ]));
         msg = ''
           `${license}` is a deprecated license, please check if project uses `${license}Plus` or `${license}Only` and change `meta.license` accordingly.
         '';
@@ -28,4 +27,4 @@ let
     );
 
 in
-  checkFor checkDerivation final prev
+checkFor checkDerivation final prev
