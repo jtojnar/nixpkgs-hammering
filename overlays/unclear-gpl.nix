@@ -3,13 +3,15 @@ let
   inherit (prev) lib;
   inherit (import ../lib { inherit lib; }) checkFor;
 
-  licenses = [
-    "gpl2"
-    "gpl3"
-    "lgpl2"
-    "lgpl21"
-    "lgpl3"
-  ];
+  licenses = lib.filter
+    (licenseName: lib.licenses ? ${licenseName})
+    [
+      "gpl2"
+      "gpl3"
+      "lgpl2"
+      "lgpl21"
+      "lgpl3"
+    ];
 
   checkDerivation = drvArgs: drv:
     (map
