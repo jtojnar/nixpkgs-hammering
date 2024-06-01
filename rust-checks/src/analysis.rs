@@ -1,10 +1,14 @@
 use crate::common_structs::{Attr, NixpkgsHammerMessage};
 use codespan::{FileId, Files};
 use rnix::{types::*, SyntaxNode};
-use std::io::BufReader;
-use std::path::Path;
-use std::process::{ChildStdout, Command, Stdio};
-use std::{collections::HashMap, error::Error, fs};
+use std::{
+    collections::HashMap,
+    error::Error,
+    fs,
+    io::BufReader,
+    path::Path,
+    process::{ChildStdout, Command, Stdio},
+};
 
 pub type Report = Vec<NixpkgsHammerMessage>;
 pub type NixFileAnalyzer = fn(&Files<String>, FileId) -> Result<Report, Box<dyn Error>>;

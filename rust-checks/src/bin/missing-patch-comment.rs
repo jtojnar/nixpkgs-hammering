@@ -1,10 +1,12 @@
 use codespan::{FileId, Files};
-use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::comment_finders::{find_comment_above, find_comment_within, find_comment_after};
-use nixpkgs_hammering_ast_checks::common_structs::{NixpkgsHammerMessage, SourceLocation, Attr};
-use nixpkgs_hammering_ast_checks::tree_utils::{parents, walk_keyvalues_filter_key, walk_kind};
+use nixpkgs_hammering_ast_checks::{
+    analysis::*,
+    comment_finders::{find_comment_above, find_comment_after, find_comment_within},
+    common_structs::{Attr, NixpkgsHammerMessage, SourceLocation},
+    tree_utils::{parents, walk_keyvalues_filter_key, walk_kind},
+};
 use rnix::{types::*, SyntaxKind::*};
-use std::{io, error::Error};
+use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
