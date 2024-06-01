@@ -7,12 +7,15 @@ use std::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    let attrs: Vec<CheckedAttr> = serde_json::from_reader(io::stdin())?;
     println!("{}", analyze_log_files(attrs, analyze_single_file)?);
     Ok(())
 }
 
-fn analyze_single_file(log: BufReader<ChildStdout>, attr: &Attr) -> Result<Report, Box<dyn Error>> {
+fn analyze_single_file(
+    log: BufReader<ChildStdout>,
+    attr: &CheckedAttr,
+) -> Result<Report, Box<dyn Error>> {
     // Looking for two kinds of messages in the log that indicate no tests were run. The
     // first is from `setuptoolsCheckPhase`, and looks like
 

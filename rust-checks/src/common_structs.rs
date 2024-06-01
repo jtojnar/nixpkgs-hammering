@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Attr {
+pub struct CheckedAttr {
     pub name: String,
     pub location: Option<SourceLocation>,
     pub drv: Option<String>,

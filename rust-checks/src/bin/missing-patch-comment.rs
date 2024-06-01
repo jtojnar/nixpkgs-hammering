@@ -2,14 +2,14 @@ use codespan::{FileId, Files};
 use nixpkgs_hammering_ast_checks::{
     analysis::*,
     comment_finders::{find_comment_above, find_comment_after, find_comment_within},
-    common_structs::{Attr, NixpkgsHammerMessage, SourceLocation},
+    common_structs::{CheckedAttr, NixpkgsHammerMessage, SourceLocation},
     tree_utils::{parents, walk_keyvalues_filter_key, walk_kind},
 };
 use rnix::{types::*, SyntaxKind::*};
 use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    let attrs: Vec<CheckedAttr> = serde_json::from_reader(io::stdin())?;
     println!("{}", analyze_nix_files(attrs, analyze_single_file)?);
     Ok(())
 }

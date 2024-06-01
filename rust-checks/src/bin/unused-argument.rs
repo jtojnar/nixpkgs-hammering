@@ -4,7 +4,7 @@ use rnix::{types::*, SyntaxKind::*, SyntaxNode};
 use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
+    let attrs: Vec<CheckedAttr> = serde_json::from_reader(io::stdin())?;
     println!("{}", analyze_nix_files(attrs, analyze_single_file)?);
     Ok(())
 }
