@@ -1,6 +1,7 @@
 use crate::common_structs::{CheckedAttr, NixpkgsHammerMessage};
 use codespan::{FileId, Files};
-use rnix::{types::*, SyntaxNode};
+use rnix::{Root, SyntaxNode};
+use rowan::ast::AstNode as _;
 use std::{
     collections::HashMap,
     error::Error,
@@ -64,23 +65,23 @@ pub fn analyze_log_files(
 
 /// Parses a Nix file and returns a root AST node.
 pub fn find_root(files: &Files<String>, file_id: FileId) -> Result<SyntaxNode, String> {
-    let ast = rnix::parse(files.source(file_id))
-        .as_result()
-        .map_err(|_| {
-            format!(
-                "Unable to parse {} as a nix file",
-                files
-                    .name(file_id)
-                    .to_str()
-                    .unwrap_or("unprintable file, encoding error")
-            )
-        })?;
+    let root = Root::parse(files.source(file_id)).ok().map_err(|_| {
+        format!(
+            "Unable to parse {} as a nix file",
+            files
+                .name(file_id)
+                .to_str()
+                .unwrap_or("unprintable file, encoding error")
+        )
+    })?;
 
-    ast.root().inner().ok_or(format!(
+    let expr = root.expr().ok_or(format!(
         "No elements in the AST in path {}",
         files
             .name(file_id)
             .to_str()
             .unwrap_or("unprintable file, encoding error")
-    ))
+    ))?;
+
+    Ok(expr.syntax().clone())
 }
