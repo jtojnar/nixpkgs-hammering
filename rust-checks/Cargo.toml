@@ -2,7 +2,7 @@
 name = "nixpkgs-hammering-ast-checks"
 version = "0.0.0"
 authors = ["Robert T. McGibbon <rmcgibbo@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 codespan = "0.11"
