@@ -1,4 +1,5 @@
-use rnix::{types::*, SyntaxElement, SyntaxKind, SyntaxKind::*, SyntaxNode, WalkEvent};
+use rnix::{ast::*, SyntaxElement, SyntaxKind, SyntaxKind::*, SyntaxNode, WalkEvent};
+use rowan::ast::AstNode as _;
 use std::iter::{once, successors};
 
 pub fn walk_kind(node: &SyntaxNode, kind: SyntaxKind) -> impl Iterator<Item = SyntaxElement> {
@@ -10,19 +11,19 @@ pub fn walk_kind(node: &SyntaxNode, kind: SyntaxKind) -> impl Iterator<Item = Sy
         })
 }
 
-pub fn walk_keyvalues_filter_key<'a>(
+pub fn walk_attrpath_values_filter_attrpath<'a>(
     node: &SyntaxNode,
     key: &'a str,
-) -> impl Iterator<Item = KeyValue> + 'a {
+) -> impl Iterator<Item = AttrpathValue> + 'a {
     // Iterates over all AST nodes under `node` that are of kind `NODE_KEY_VALUE`,
     // (which corresponds to a key-value pair inside a nix attrset) and yields
     // only the nodes where the key is equal to `key`.
-    walk_kind(node, NODE_KEY_VALUE)
+    walk_kind(node, NODE_ATTRPATH_VALUE)
         .filter_map(|element| element.into_node())
-        .filter_map(|node| KeyValue::cast(node))
-        .filter(move |kv| {
-            kv.key()
-                .map_or(false, |e| e.node().to_string() == key.to_string())
+        .filter_map(|node| AttrpathValue::cast(node))
+        .filter(move |pair| {
+            pair.attrpath()
+                .map_or(false, |e| e.syntax().to_string() == key.to_string())
         })
 }
 

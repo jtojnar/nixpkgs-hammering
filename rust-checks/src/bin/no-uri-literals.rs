@@ -19,7 +19,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
 
     // Find all URI literals and report them.
     for uri in walk_kind(&root, TOKEN_URI) {
-        let start = uri.text_range().start().to_usize() as u32;
+        let start: u32 = uri.text_range().start().into();
 
         report.push(NixpkgsHammerMessage {
             msg: "URI literals are deprecated.".to_string(),
