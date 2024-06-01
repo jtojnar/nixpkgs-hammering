@@ -1,9 +1,11 @@
 use codespan::{FileId, Files};
-use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::common_structs::{Attr, NixpkgsHammerMessage, SourceLocation};
+use nixpkgs_hammering_ast_checks::{
+    analysis::*,
+    common_structs::{Attr, NixpkgsHammerMessage, SourceLocation},
+    tree_utils::walk_kind,
+};
 use rnix::SyntaxKind::*;
-use std::{io, error::Error};
-use nixpkgs_hammering_ast_checks::tree_utils::walk_kind;
+use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
@@ -11,10 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn analyze_single_file(
-    files: &Files<String>,
-    file_id: FileId,
-) -> Result<Report, Box<dyn Error>> {
+fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report, Box<dyn Error>> {
     let root = find_root(files, file_id)?;
     let mut report: Report = vec![];
 

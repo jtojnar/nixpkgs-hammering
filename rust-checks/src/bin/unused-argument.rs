@@ -1,10 +1,7 @@
 use codespan::{FileId, Files};
-use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::common_structs::*;
-use nixpkgs_hammering_ast_checks::tree_utils::walk_kind;
-use rnix::SyntaxKind::*;
-use rnix::{types::*, SyntaxNode};
-use std::{io, error::Error};
+use nixpkgs_hammering_ast_checks::{analysis::*, common_structs::*, tree_utils::walk_kind};
+use rnix::{types::*, SyntaxKind::*, SyntaxNode};
+use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;

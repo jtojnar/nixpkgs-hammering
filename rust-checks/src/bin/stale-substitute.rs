@@ -1,9 +1,10 @@
-use nixpkgs_hammering_ast_checks::analysis::*;
-use nixpkgs_hammering_ast_checks::common_structs::*;
+use nixpkgs_hammering_ast_checks::{analysis::*, common_structs::*};
 use regex::Regex;
-use std::error::Error;
-use std::io::{self, BufRead, BufReader};
-use std::process::ChildStdout;
+use std::{
+    error::Error,
+    io::{self, BufRead, BufReader},
+    process::ChildStdout,
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let attrs: Vec<Attr> = serde_json::from_reader(io::stdin())?;
