@@ -1,4 +1,4 @@
-use crate::common_structs::{Attr, NixpkgsHammerMessage};
+use crate::common_structs::{CheckedAttr, NixpkgsHammerMessage};
 use codespan::{FileId, Files};
 use rnix::{types::*, SyntaxNode};
 use std::{
@@ -12,11 +12,12 @@ use std::{
 
 pub type Report = Vec<NixpkgsHammerMessage>;
 pub type NixFileAnalyzer = fn(&Files<String>, FileId) -> Result<Report, Box<dyn Error>>;
-pub type LogFileAnalyzer = fn(BufReader<ChildStdout>, &Attr) -> Result<Report, Box<dyn Error>>;
+pub type LogFileAnalyzer =
+    fn(BufReader<ChildStdout>, &CheckedAttr) -> Result<Report, Box<dyn Error>>;
 
 /// Runs given analyzer the nix file for each attr
 pub fn analyze_nix_files(
-    attrs: Vec<Attr>,
+    attrs: Vec<CheckedAttr>,
     analyzer: NixFileAnalyzer,
 ) -> Result<String, Box<dyn Error>> {
     let mut report: HashMap<String, Report> = HashMap::new();
@@ -33,7 +34,7 @@ pub fn analyze_nix_files(
 
 /// Runs given analyzer on log file for each attr, if exists
 pub fn analyze_log_files(
-    attrs: Vec<Attr>,
+    attrs: Vec<CheckedAttr>,
     analyzer: LogFileAnalyzer,
 ) -> Result<String, Box<dyn Error>> {
     let mut report: HashMap<String, Report> = HashMap::new();

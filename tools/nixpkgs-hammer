@@ -30,7 +30,7 @@ class Report:
 
 
 @dataclass(frozen=True)
-class Attr:
+class CheckedAttr:
     # name of attr, e.g. python38Packages.numpy
     name: str
     # location in which the attr is defined, if exist
@@ -76,14 +76,15 @@ def get_check_programs() -> Set[str]:
 
 
 def run_external_checks(
-    attrs: List[Attr], excluded_rules: List[str]
+    attrs: List[CheckedAttr],
+    excluded_rules: List[str],
 ) -> Dict[str, List[Report]]:
     rules = get_check_programs() - set(excluded_rules)
     if len(rules) == 0:
         return {}
 
     encoded_attrs = json.dumps(attrs, cls=JSONEncoder)
-    result: Dict[Attr, List[Report]] = defaultdict(list)
+    result: Dict[CheckedAttr, List[Report]] = defaultdict(list)
 
     if "no-build-output" not in excluded_rules:
         names_without_outputs = [
@@ -137,7 +138,10 @@ def escape_attr(attr: str) -> str:
     return ".".join(f'"{section}"' for section in attr.split("."))
 
 
-def nix_eval_json(expr: str, show_trace: bool = False) -> Dict[Attr, List[Report]]:
+def nix_eval_json(
+    expr: str,
+    show_trace: bool = False,
+) -> Dict[CheckedAttr, List[Report]]:
     args = ["nix-instantiate", "--strict", "--json", "--eval", "-"]
 
     if show_trace:
@@ -156,9 +160,9 @@ def nix_eval_json(expr: str, show_trace: bool = False) -> Dict[Attr, List[Report
             return SourceLocation(**s)
         return None
 
-    result: Dict[Attr, List[Report]] = {}
+    result: Dict[CheckedAttr, List[Report]] = {}
     for name, data in json.loads(json_text).items():
-        attr = Attr(
+        attr = CheckedAttr(
             name=name,
             output=maybe_path(data.get("outputPath")),
             drv=maybe_path(data.get("drvPath")),
