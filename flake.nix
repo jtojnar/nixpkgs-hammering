@@ -85,6 +85,7 @@
             python3
             rustc
             cargo
+            rust-analyzer
           ];
         };
     };
