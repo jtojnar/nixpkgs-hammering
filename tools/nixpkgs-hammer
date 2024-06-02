@@ -234,7 +234,6 @@ def render_report_ansi(report: Report) -> str:
 def main(args):
     script_dir = Path(__file__).parent
     overlay_generators_path = (script_dir.parent / "overlays").absolute()
-    lib_dir = (script_dir.parent / "lib").absolute()
 
     try_eval = "(value: { inherit value; success = true; })" if args.do_not_catch_errors else "builtins.tryEval"
 
