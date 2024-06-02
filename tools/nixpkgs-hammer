@@ -301,7 +301,7 @@ def main(args):
             continue
 
         overlay = overlay_generator.name
-        overlay_expressions.append(f"(import {overlay_generators_path}/{overlay})")
+        overlay_expressions.append(f"(import {overlay_generators_path / overlay})")
 
     attr_messages_nix = (
         "{\n" + indent("".join(attr_messages)) + "\n}" if attr_messages else "{ }"
