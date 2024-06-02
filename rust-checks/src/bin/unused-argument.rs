@@ -1,4 +1,4 @@
-use nixpkgs_hammering_ast_checks::{checks::unused_argument, common_structs::CheckedAttr};
+use rust_checks::{checks::unused_argument, common_structs::CheckedAttr};
 use std::{error::Error, io};
 
 fn main() -> Result<(), Box<dyn Error>> {
