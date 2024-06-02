@@ -1,3 +1,4 @@
+use rust_checks::common_structs;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, path::PathBuf};
 
@@ -23,6 +24,26 @@ pub struct SourceLocation {
     pub file: PathBuf,
     pub line: usize,
     pub column: Option<usize>,
+}
+
+fn pb_to_string(buf: PathBuf) -> Result<String, String> {
+    Ok(buf
+        .to_str()
+        .ok_or_else(|| format!("File path ‘{}’ not a valid UTF-8 string", buf.display()))?
+        .to_owned())
+}
+
+impl TryInto<common_structs::SourceLocation> for SourceLocation {
+    type Error = String;
+
+    fn try_into(self) -> Result<common_structs::SourceLocation, Self::Error> {
+        let SourceLocation { file, line, column } = self;
+        Ok(common_structs::SourceLocation {
+            file: pb_to_string(file)?,
+            line,
+            column,
+        })
+    }
 }
 
 fn default_link() -> bool {
@@ -55,4 +76,28 @@ pub struct CheckedAttr {
     pub drv: Option<PathBuf>,
     /// path the the output of the drv in the nix store, if exists
     pub output: Option<PathBuf>,
+}
+
+impl TryInto<common_structs::CheckedAttr> for CheckedAttr {
+    type Error = String;
+
+    fn try_into(self) -> Result<common_structs::CheckedAttr, Self::Error> {
+        let CheckedAttr {
+            name,
+            location,
+            drv,
+            output,
+        } = self;
+
+        let location = location.map(|l| l.try_into()).transpose()?;
+        let drv = drv.map(pb_to_string).transpose()?;
+        let output = output.map(pb_to_string).transpose()?;
+
+        Ok(common_structs::CheckedAttr {
+            name,
+            location,
+            drv,
+            output,
+        })
+    }
 }
