@@ -49,15 +49,18 @@
               } ''
                 install -D ${./tools/nixpkgs-hammer} $out/bin/nixpkgs-hammer
                 patchShebangs $out/bin/nixpkgs-hammer
+                datadir="$out/share/nixpkgs-hammering"
+                mkdir -p "$datadir"
 
                 wrapProgram "$out/bin/nixpkgs-hammer" \
                     --prefix PATH ":" ${prev.lib.makeBinPath [
                       prev.nix
                       rust-checks
                     ]} \
-                    --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names}
-                cp -r ${./overlays} $out/overlays
-                cp -r ${./lib} $out/lib
+                    --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names} \
+                    --set OVERLAYS_DIR "$datadir/overlays"
+                cp -r ${./overlays} "$datadir/overlays"
+                cp -r ${./lib} "$datadir/lib"
               '';
         };
     };
