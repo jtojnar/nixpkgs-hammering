@@ -284,7 +284,7 @@ def main(args):
                               null
                             else {{
                               file = builtins.elemAt posSplit 0;
-                              line = builtins.elemAt posSplit 2;
+                              line = builtins.fromJSON (builtins.elemAt posSplit 2);
                             }};
                         outputPath = result.value.outPath;
                         drvPath = result.value.drvPath;
