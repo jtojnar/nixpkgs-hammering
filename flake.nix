@@ -20,45 +20,31 @@
 
         {
           nixpkgs-hammering =
-            let
-              rust-checks = prev.rustPlatform.buildRustPackage {
-                pname = "rust-checks";
-                version = (prev.lib.importTOML ./rust-checks/Cargo.toml).package.version;
-                src = ./rust-checks;
-                cargoLock.lockFile = ./rust-checks/Cargo.lock;
+            prev.rustPlatform.buildRustPackage {
+              pname = "nixpkgs-hammering";
+              version = (prev.lib.importTOML ./Cargo.toml).package.version;
+              src = ./.;
+
+              cargoLock.lockFile = ./Cargo.lock;
+
+              nativeBuildInputs = with prev; [
+                makeWrapper
+              ];
+
+              passthru = {
+                exePath = "/bin/nixpkgs-hammer";
               };
 
-              # Find all of the binaries installed by rust-checks. Note, if this changes
-              # in the future to use wrappers or something else that pollute the bin/
-              # directory, this logic will have to grow.
-              rust-check-names = let
-                binContents = builtins.readDir "${rust-checks}/bin";
-              in
-                prev.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
-            in
-              prev.runCommand "nixpkgs-hammering" {
-                buildInputs = with prev; [
-                  python3
-                  makeWrapper
-                ];
-
-                passthru = {
-                  inherit rust-checks;
-                  exePath = "/bin/nixpkgs-hammer";
-                };
-              } ''
-                install -D ${./tools/nixpkgs-hammer} $out/bin/nixpkgs-hammer
-                patchShebangs $out/bin/nixpkgs-hammer
+              postInstall = ''
+                datadir="$out/share/nixpkgs-hammering"
+                mkdir -p "$datadir"
 
                 wrapProgram "$out/bin/nixpkgs-hammer" \
-                    --prefix PATH ":" ${prev.lib.makeBinPath [
-                      prev.nix
-                      rust-checks
-                    ]} \
-                    --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names}
-                cp -r ${./overlays} $out/overlays
-                cp -r ${./lib} $out/lib
+                    --set OVERLAYS_DIR "$datadir/overlays"
+                cp -r ${./overlays} "$datadir/overlays"
+                cp -r ${./lib} "$datadir/lib"
               '';
+            };
         };
     };
   } // utils.lib.eachDefaultSystem (system: let
@@ -86,6 +72,7 @@
             rustc
             cargo
             rust-analyzer
+            rustfmt
           ];
         };
     };
