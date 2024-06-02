@@ -115,7 +115,7 @@ def run_external_checks(
 
 def concatenate_messages(
     *report_sources: Dict[str, List[Report]]
-) -> Dict[Attr, List[Report]]:
+) -> Dict[str, List[Report]]:
     result = defaultdict(list)
     for m in report_sources:
         for attr_name, report in m.items():
