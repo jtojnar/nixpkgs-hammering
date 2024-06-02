@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  pull_request:
   push:
 
 jobs:
@@ -13,6 +12,14 @@ jobs:
 
     - name: Install Nix
       uses: cachix/install-nix-action@v27
+      with:
+        install_url: https://releases.nixos.org/nix/nix-2.17.0/install
+
+    - name: Nix config
+      run: |
+        echo "============================"
+        cat /etc/nix/nix.conf
+        echo "============================"
 
     - name: Run tests
       run: nix shell -c ./run-tests.py

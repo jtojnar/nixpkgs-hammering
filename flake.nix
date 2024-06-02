@@ -40,9 +40,6 @@
                 mkdir -p "$datadir"
 
                 wrapProgram "$out/bin/nixpkgs-hammer" \
-                    --prefix PATH ":" ${prev.lib.makeBinPath [
-                      prev.nix
-                    ]} \
                     --set OVERLAYS_DIR "$datadir/overlays"
                 cp -r ${./overlays} "$datadir/overlays"
                 cp -r ${./lib} "$datadir/lib"
