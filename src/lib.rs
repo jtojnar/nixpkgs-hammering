@@ -1,5 +1,6 @@
 use indoc::formatdoc;
 use model::{CheckedAttr, Report, Severity, SourceLocation};
+use rust_checks::checks::{self, Check};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
@@ -35,22 +36,19 @@ fn get_overlays_dir() -> Result<PathBuf, String> {
     Err("Either ‘OVERLAYS_DIR’ or ‘CARGO_MANIFEST_DIR’ environment variable expected.".to_owned())
 }
 
-fn get_check_programs() -> Result<HashSet<String>, String> {
-    // Each rule that is implemented as an external check program rather
-    // than an overlay is installed onto our PATH, and the names of the
-    // rules put into this environment variable.
-    Ok(optional_env("AST_CHECK_NAMES")?.map_or_else(
-        || HashSet::new(),
-        |ast_checks| HashSet::from_iter(ast_checks.split(":").map(ToOwned::to_owned)),
-    ))
+fn get_checks(excluded_rules: &HashSet<String>) -> HashMap<String, Check> {
+    checks::ALL
+        .into_iter()
+        .map(|(name, check)| (name.to_string(), check))
+        .filter(|(name, _)| !excluded_rules.contains(name))
+        .collect()
 }
 
-fn run_external_checks(
+fn run_checks(
     attrs: &[CheckedAttr],
     excluded_rules: &HashSet<String>,
 ) -> Result<HashMap<String, Vec<Report>>, String> {
-    let check_programs = get_check_programs()?;
-    let rules = &check_programs - &excluded_rules;
+    let rules = get_checks(excluded_rules);
     if rules.is_empty() {
         return Ok(HashMap::new());
     }
@@ -81,24 +79,28 @@ fn run_external_checks(
         }
     }
 
-    for rule in rules {
-        let json_text = run_command_with_input(&rule, &[], &encoded_attrs).map_err(|err| {
+    let rc_attrs = attrs
+        .iter()
+        .map(|attr| attr.clone().try_into())
+        .collect::<Result<Vec<_>, _>>()?;
+    for (name, check) in rules {
+        let json_text = check(rc_attrs.clone()).map_err(|err| {
             eprintln!(
                 "{}",
                 red(&format!(
-                    "Rule ‘{rule}’ failed with input ‘{encoded_attrs}’.\
+                    "Rule ‘{name}’ failed with input ‘{encoded_attrs}’.\
                     This is a bug. Please file a ticket on GitHub."
                 ))
             );
 
-            format!("Unable to execute rule ‘{rule}’: {}", err.to_string())
+            format!("Unable to execute rule ‘{name}’: {}", err.to_string())
         })?;
 
         if !json_text.is_empty() {
             let results: HashMap<String, Vec<Report>> =
                 serde_json::from_str(&json_text).map_err(|err| {
                     format!(
-                        "Unable to parse result of rule ‘{rule}’: {}",
+                        "Unable to parse result of rule ‘{name}’: {}",
                         err.to_string()
                     )
                 })?;
@@ -397,7 +399,7 @@ pub fn hammer(config: Config) -> Result<(), String> {
     }
 
     let overlay_data = nix_eval_json(all_messages_nix, config.show_trace)?;
-    let external_reports = run_external_checks(
+    let reports = run_checks(
         &overlay_data.keys().map(|k| k.clone()).collect::<Vec<_>>(),
         &HashSet::from_iter(config.excluded_rules),
     )?;
@@ -406,7 +408,7 @@ pub fn hammer(config: Config) -> Result<(), String> {
             .into_iter()
             .map(|(attr, reports)| (attr.name, reports)),
     );
-    let all_messages = concatenate_messages(&mut [overlay_reports, external_reports]);
+    let all_messages = concatenate_messages(&mut [overlay_reports, reports]);
 
     if config.json {
         let encoded_messages = serde_json::to_string(&all_messages)

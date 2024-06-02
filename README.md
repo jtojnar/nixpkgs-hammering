@@ -32,7 +32,7 @@ There are two kinds of checks.
 
 The first kind can be expressed directly in Nix and they are implemented as Nixpkgs overlays that replace `stdenv.mkDerivation` and other similar functions and attach an attribute containing a report to the resulting derivation’s attribute set. The tool then evaluates the attribute.
 
-The second require extra facilities so the tool will execute them individually, passing them the attribute paths to check, the corresponding file paths, and (if available) build logs. They can be arbitrary programs so they can do as they please – for example, parse the code into [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree), read build logs, inspect the build output or even access network.
+The second are more involved and the tool will execute them individually, passing each of them the attribute paths to check, the corresponding file paths, and (if available) build logs. They are implemented in Rust so they can perform arbitrary validation tasks – for example, parse the code into [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree), read build logs, inspect the build output or even access network.
 
 ## How do I develop this?
 
