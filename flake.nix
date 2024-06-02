@@ -36,9 +36,14 @@
               in
                 prev.lib.mapAttrsToList (name: type: assert type == "regular"; name) binContents;
             in
-              prev.runCommand "nixpkgs-hammering" {
-                buildInputs = with prev; [
-                  python3
+              prev.rustPlatform.buildRustPackage {
+                pname = "nixpkgs-hammering";
+                version = (prev.lib.importTOML ./Cargo.toml).package.version;
+                src = ./.;
+
+                cargoLock.lockFile = ./Cargo.lock;
+
+                nativeBuildInputs = with prev; [
                   makeWrapper
                 ];
 
@@ -46,22 +51,22 @@
                   inherit rust-checks;
                   exePath = "/bin/nixpkgs-hammer";
                 };
-              } ''
-                install -D ${./tools/nixpkgs-hammer} $out/bin/nixpkgs-hammer
-                patchShebangs $out/bin/nixpkgs-hammer
-                datadir="$out/share/nixpkgs-hammering"
-                mkdir -p "$datadir"
 
-                wrapProgram "$out/bin/nixpkgs-hammer" \
-                    --prefix PATH ":" ${prev.lib.makeBinPath [
-                      prev.nix
-                      rust-checks
-                    ]} \
-                    --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names} \
-                    --set OVERLAYS_DIR "$datadir/overlays"
-                cp -r ${./overlays} "$datadir/overlays"
-                cp -r ${./lib} "$datadir/lib"
-              '';
+                postInstall = ''
+                  datadir="$out/share/nixpkgs-hammering"
+                  mkdir -p "$datadir"
+
+                  wrapProgram "$out/bin/nixpkgs-hammer" \
+                      --prefix PATH ":" ${prev.lib.makeBinPath [
+                        prev.nix
+                        rust-checks
+                      ]} \
+                      --set AST_CHECK_NAMES ${prev.lib.concatStringsSep ":" rust-check-names} \
+                      --set OVERLAYS_DIR "$datadir/overlays"
+                  cp -r ${./overlays} "$datadir/overlays"
+                  cp -r ${./lib} "$datadir/lib"
+                '';
+              };
         };
     };
   } // utils.lib.eachDefaultSystem (system: let
