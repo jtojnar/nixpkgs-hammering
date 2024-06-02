@@ -70,18 +70,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nixpkgs-hammering-ast-checks"
-version = "0.0.0"
-dependencies = [
- "codespan",
- "regex",
- "rnix",
- "rowan",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "proc-macro2"
 version = "1.0.84"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -149,6 +137,18 @@ dependencies = [
  "rustc-hash",
  "serde",
  "text-size",
+]
+
+[[package]]
+name = "rust-checks"
+version = "0.0.0"
+dependencies = [
+ "codespan",
+ "regex",
+ "rnix",
+ "rowan",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

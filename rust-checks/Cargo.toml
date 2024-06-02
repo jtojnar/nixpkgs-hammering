@@ -1,5 +1,5 @@
 [package]
-name = "nixpkgs-hammering-ast-checks"
+name = "rust-checks"
 version = "0.0.0"
 authors = ["Robert T. McGibbon <rmcgibbo@gmail.com>"]
 edition = "2021"
