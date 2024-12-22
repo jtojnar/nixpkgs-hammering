@@ -7,7 +7,7 @@ buildPythonPackage {
 
   src = ../fixtures/make;
 
-  checkInputs = [
+  nativeCheckInputs = [
     pytestCheckHook
   ];
 }
