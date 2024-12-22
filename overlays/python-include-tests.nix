@@ -10,7 +10,6 @@ let
         let
           isTestHook = name: builtins.elem name [
             "pytest-check-hook"
-            "setuptools-check-hook"
           ];
           hasCheckPhase = drvArgs ? checkPhase || drvArgs ? installCheckPhase;
           hasDoCheckFalse = (drv ? doInstallCheck) && !drv.doInstallCheck;
