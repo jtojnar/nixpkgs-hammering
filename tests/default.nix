@@ -19,7 +19,6 @@
   name-and-version = pkgs.recurseIntoAttrs (pkgs.callPackage ./name-and-version { });
   no-flags-array = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-flags-array { });
   no-flags-spaces = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-flags-spaces { });
-  no-python-tests = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-python-tests { });
   no-uri-literals = pkgs.recurseIntoAttrs (pkgs.callPackage ./no-uri-literals { });
   patch-phase = pkgs.callPackage ./patch-phase { };
   python-explicit-check-phase = pkgs.recurseIntoAttrs (pkgs.callPackage ./python-explicit-check-phase { });
