@@ -7,6 +7,6 @@ stdenv.mkDerivation {
   src = ../fixtures/make;
 
   patchPhase = ''
-    substituteInPlace foo.in --replace string-that-does-not-exist bar
+    substituteInPlace foo.in --replace-warn string-that-does-not-exist bar
   '';
 }

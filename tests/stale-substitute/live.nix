@@ -7,6 +7,6 @@ stdenv.mkDerivation {
   src = ../fixtures/make;
 
   patchPhase = ''
-    substituteInPlace foo.in --replace foo bar
+    substituteInPlace foo.in --replace-warn foo bar
   '';
 }
