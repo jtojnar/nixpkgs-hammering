@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn analyze_single_file(log: BufReader<ChildStdout>, attr: &Attr) -> Result<Report, Box<dyn Error>> {
     let re = Regex::new(
-        r"substituteStream\(\): WARNING: pattern (.*?) doesn't match anything in file '(.*?)'",
+        r"substituteStream\(\) in derivation .+: WARNING: pattern (.*?) doesn't match anything in file '(.*?)'",
     )
     .unwrap();
 
