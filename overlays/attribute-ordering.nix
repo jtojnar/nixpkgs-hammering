@@ -25,13 +25,12 @@ let
   checkDerivation = drvArgs: drv:
     let
       getAttrPos = attr: (builtins.unsafeGetAttrPos attr drvArgs);
-      getAttrLine = attr: (getAttrPos attr).line;
 
       drvAttrs = lib.pipe drvArgs [
         builtins.attrNames
         # Certain functions like mapAttrs can produce attributes without associated position.
         (builtins.filter (attr: getAttrPos attr != null))
-        (builtins.sort (a: b: getAttrLine a < getAttrLine b))
+        (builtins.sort (aName: bName: let a = getAttrPos aName; b = getAttrPos bName; in a.line < b.line || (a.line == b.line && a.column < b.column)))
       ];
 
       knownDrvAttrs = builtins.filter (attr: preferredOrdering ? "${attr}") drvAttrs;
@@ -45,11 +44,7 @@ let
           sameGroup = fstInfo.group == sndInfo.group;
         in {
           name = "attribute-ordering";
-          cond =
-            fstInfo.order > sndInfo.order &&
-            # Inherited attributes all have the same position so sort will keep them in alphabetical order returned by attrNames.
-            # This means we will not be able to detect if they are out of order and have to skip them.
-            getAttrPos fst != getAttrPos snd;
+          cond = fstInfo.order > sndInfo.order;
           msg = ''
             The ${lib.optionalString (sndInfo.group != null && !sameGroup) "${sndInfo.group}, including the "}attribute “${snd}” should preferably come before ${lib.optionalString (fstInfo.group != null && !sameGroup) "${fstInfo.group}’ "}“${fst}” attribute ${lib.optionalString (sndInfo.group != null && sameGroup) "among ${sndInfo.group} "}in the expression.
           '';
