@@ -43,7 +43,7 @@ let
     "gnum4"
     "gnumake"
     "gnused"
-    "gnustep.make"
+    "gnustep-make"
     "gogUnpackHook"
     "go-md2man"
     "gtk-doc"
