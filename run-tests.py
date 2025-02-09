@@ -24,6 +24,7 @@ def make_test_variant(rule, variant=None, should_match=True, prebuild=False):
             ["nixpkgs-hammer", "-f", "./tests", "--json", attr_path],
             stdout=subprocess.PIPE,
             text=True,
+            env={**os.environ, "NIXPKGS_HAMMERING_FATAL_EVAL_ISSUES": "1"},
         )
 
         if test_build.returncode != 0:

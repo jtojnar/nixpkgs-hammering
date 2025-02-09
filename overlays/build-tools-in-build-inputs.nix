@@ -3,7 +3,7 @@ let
   inherit (prev) lib;
   inherit (import ../lib { inherit lib; }) checkMkDerivationFor;
 
-  buildTools = [
+  buildToolAttrs = [
     "antlr"
     "asciidoc"
     "asciidoctor"
@@ -100,13 +100,30 @@ let
     "darwin.cctools"
   ];
 
+  developmentMode = builtins.getEnv "NIXPKGS_HAMMERING_FATAL_EVAL_ISSUES" != "";
+
+  mkTool =
+    attrPath:
+    let
+      package = lib.attrByPath (lib.splitString "." attrPath) null prev;
+    in
+    if package == null then
+      if developmentMode then throw "‘${attrPath}’ does not exist in Nixpkgs." else null
+    else
+      {
+        name = attrPath;
+        inherit package;
+      };
+
+  buildTools = builtins.filter (tool: tool != null) (builtins.map mkTool buildToolAttrs);
+
   checkDerivation = drvArgs: drv:
     (map
       (tool: {
         name = "build-tools-in-build-inputs";
-        cond = lib.elem (lib.attrByPath (lib.splitString "." tool) (throw "‘${tool}’ does not exist in Nixpkgs.") prev) (drvArgs.buildInputs or [ ]);
+        cond = lib.elem tool.package (drvArgs.buildInputs or [ ]);
         msg = ''
-          ${tool} is a build tool so it likely goes to `nativeBuildInputs`, not `buildInputs`.
+          ${tool.name} is a build tool so it likely goes to `nativeBuildInputs`, not `buildInputs`.
         '';
         locations = [
           (builtins.unsafeGetAttrPos "buildInputs" drvArgs)
