@@ -109,6 +109,8 @@ let
     in
     if package == null then
       if developmentMode then throw "‘${attrPath}’ does not exist in Nixpkgs." else null
+    else if package.meta.broken or false then
+      if developmentMode then throw "‘${attrPath}’ is broken in Nixpkgs." else null
     else
       {
         name = attrPath;
