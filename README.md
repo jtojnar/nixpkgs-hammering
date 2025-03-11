@@ -8,10 +8,10 @@ This repository contains a bunch of [overlays](https://nixos.org/nixpkgs/manual/
 
 ## How do I use this?
 
-Run the following command in your nixpkgs directory when you use stable Nix:
+Run the following command in your nixpkgs directory when you use classic Nix:
 
 ```
-nix run -f https://github.com/jtojnar/nixpkgs-hammering/archive/main.tar.gz -c nixpkgs-hammer <attr-path>...
+nix-shell https://github.com/jtojnar/nixpkgs-hammering/archive/main.tar.gz -A nixpkgs-hammering --run 'nixpkgs-hammer <attr-path>...'
 ```
 
 or with Flakes-enabled Nix:

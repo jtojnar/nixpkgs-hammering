@@ -88,6 +88,14 @@
             rust-analyzer
           ];
         };
+
+      # For legacy shell.nix
+      nixpkgs-hammering =
+        pkgs.mkShell {
+          buildInputs = with pkgs; [
+            self.packages.${system}.nixpkgs-hammering
+          ];
+        };
     };
   });
 }
