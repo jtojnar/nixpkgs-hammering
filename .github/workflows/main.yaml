@@ -10,6 +10,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        # Nix fails to load the flake using flake-compat otherwise.
+        fetch-depth: 0
 
     - name: Install Nix
       uses: cachix/install-nix-action@v31
