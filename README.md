@@ -39,7 +39,7 @@ The second are more involved and the tool will execute them individually, passin
 Run tests:
 
 ```
-nix shell -c ./run-tests.py
+cargo test
 ```
 
 > **Note**

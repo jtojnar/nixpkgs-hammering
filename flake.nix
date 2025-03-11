@@ -35,6 +35,10 @@
                 exePath = "/bin/nixpkgs-hammer";
               };
 
+              # Running tests is slow and requires properly placed overlays.
+              # We are doing that in CI outside of the derivation.
+              doCheck = false;
+
               postInstall = ''
                 datadir="$out/share/nixpkgs-hammering"
                 mkdir -p "$datadir"
@@ -71,7 +75,6 @@
       default =
         pkgs.mkShell {
           buildInputs = with pkgs; [
-            python3
             rustc
             cargo
             rust-analyzer

@@ -18,4 +18,4 @@ jobs:
       uses: cachix/install-nix-action@v31
 
     - name: Run tests
-      run: nix shell -c ./run-tests.py
+      run: nix develop -c cargo test
