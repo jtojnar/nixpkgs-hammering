@@ -8,6 +8,6 @@ edition = "2021"
 codespan = "0.12"
 regex = "1"
 rnix = "0.12"
-rowan = { version = "0.15", features = [ "serde1" ] }
+rowan = { version = "0.16", features = [ "serde1" ] }
 serde = { workspace = true }
 serde_json = { workspace = true }
