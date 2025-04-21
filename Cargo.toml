@@ -9,7 +9,7 @@ name = "nixpkgs-hammer"
 path = "src/main.rs"
 
 [dependencies]
-clap = { version = "4.5.36", features = ["derive"] }
+clap = { version = "4.5.37", features = ["derive"] }
 indoc = "2.0.5"
 serde = { workspace = true }
 serde_json = { workspace = true }
