@@ -37,7 +37,6 @@ let
     "flex"
     "gawk"
     "gcc"
-    "gcc10"
     "getopt"
     "git"
     "gnum4"
