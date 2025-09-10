@@ -106,7 +106,9 @@ let
     let
       package = lib.attrByPath (lib.splitString "." attrPath) null prev;
     in
-    if package == null then
+    if !(builtins.tryEval package).success then
+      if developmentMode then throw "‘${attrPath}’ is a ‘throw \"...\"’ in Nixpkgs." else null
+    else if package == null then
       if developmentMode then throw "‘${attrPath}’ does not exist in Nixpkgs." else null
     else if package.meta.broken or false then
       if developmentMode then throw "‘${attrPath}’ is broken in Nixpkgs." else null
