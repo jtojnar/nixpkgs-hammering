@@ -19,5 +19,5 @@ rust-checks = { path = "./rust-checks" }
 members = ["rust-checks"]
 
 [workspace.dependencies]
-serde = { version = "1.0.203", features = ["serde_derive"] }
+serde = { version = "1.0.226", features = ["serde_derive"] }
 serde_json = "1.0.143"
