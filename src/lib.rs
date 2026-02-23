@@ -138,6 +138,13 @@ fn escape_attr(attr: &str) -> String {
         .join(".")
 }
 
+fn escape_nix_string(value: &str) -> String {
+    value
+        .replace('\\', "\\\\")
+        .replace('$', "\\$")
+        .replace('"', "\\\"")
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OverlayCheckResult {
@@ -354,13 +361,13 @@ pub fn hammer(config: Config) -> Result<(), String> {
         }
 
         let overlay = overlay_generator.path();
-        let overlay = overlay.to_str().ok_or_else(|| {
+        let overlay = overlay.to_str().map(escape_nix_string).ok_or_else(|| {
             format!(
                 "Overlay path ‘{}’ not valid UTF-8 string.",
                 overlay.display()
             )
         })?;
-        overlay_expressions.push(format!("(import {overlay})"));
+        overlay_expressions.push(format!("(import \"{overlay}\")"));
     }
 
     let attr_messages_nix = if !attr_messages.is_empty() {
@@ -373,16 +380,20 @@ pub fn hammer(config: Config) -> Result<(), String> {
     } else {
         "[ ]".to_owned()
     };
-    let nix_file = config.nix_file.to_str().ok_or_else(|| {
-        format!(
-            "Nix expression file path ‘{}’ not valid UTF-8 string.",
-            config.nix_file.display(),
-        )
-    })?;
+    let nix_file = config
+        .nix_file
+        .to_str()
+        .map(escape_nix_string)
+        .ok_or_else(|| {
+            format!(
+                "Nix expression file path ‘{}’ not valid UTF-8 string.",
+                config.nix_file.display(),
+            )
+        })?;
     let all_messages_nix = formatdoc!(
         "
         let
-            packageSet = {nix_file};
+            packageSet = \"{nix_file}\";
             cleanPkgs = import packageSet {{ }};
 
             pkgs = import packageSet {{
