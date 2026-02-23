@@ -38,6 +38,7 @@
       "makeFlags"
       "ninjaFlags"
       "buildFlags"
+      "yarnBuildFlags"
       "checkTarget"
       "checkFlags"
       "installFlags"

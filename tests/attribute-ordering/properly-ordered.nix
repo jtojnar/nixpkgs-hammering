@@ -44,6 +44,9 @@ stdenv.mkDerivation rec {
   buildFlags = [
   ];
 
+  yarnBuildFlags = [
+  ];
+
   installFlags = [
   ];
 
