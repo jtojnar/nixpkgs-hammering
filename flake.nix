@@ -51,6 +51,13 @@
                 cp -r ${./overlays} "$datadir/overlays"
                 cp -r ${./lib} "$datadir/lib"
               '';
+
+              meta = {
+                description = "Set of nit-picky rules that aim to point out and explain common mistakes in nixpkgs package pull requests";
+                homepage = "https://github.com/jtojnar/nixpkgs-hammering";
+                license = prev.lib.licenses.mit;
+                mainProgram = "nixpkgs-hammer";
+              };
             };
         };
     };
