@@ -5,7 +5,7 @@ authors = ["Robert T. McGibbon <rmcgibbo@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-codespan = "0.12"
+codespan = "0.13"
 regex = "1"
 rnix = "0.12"
 rowan = { version = "0.15", features = [ "serde1" ] }
