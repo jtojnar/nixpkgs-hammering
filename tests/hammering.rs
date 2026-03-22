@@ -13,13 +13,16 @@ where
         .stdout(Stdio::piped())
         .envs(envs)
         .spawn()
-        // todo: use display method once stabilized in 1.87.0
-        // https://github.com/rust-lang/rust/issues/120048
-        .map_err(|err| format!("Unable to spawn program ‘{:?}’: {err}", program.as_ref()))?;
+        .map_err(|err| {
+            format!(
+                "Unable to spawn program ‘{}’: {err}",
+                program.as_ref().display()
+            )
+        })?;
 
     child
         .wait_with_output()
-        .map_err(|err| format!("Unable to wait on ‘{:?}’: {err}", program.as_ref()))
+        .map_err(|err| format!("Unable to wait on ‘{}’: {err}", program.as_ref().display()))
 }
 
 fn make_test_variant(

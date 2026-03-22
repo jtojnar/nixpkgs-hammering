@@ -2,6 +2,7 @@
 name = "nixpkgs-hammering"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.87"
 authors = ["Jan Tojnar <jtojnar@gmail.com>"]
 
 [[bin]]
