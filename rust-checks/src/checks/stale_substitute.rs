@@ -21,7 +21,7 @@ fn analyze_single_file(
 
     let report = log
         .lines()
-        .filter_map(|line| line.ok())
+        .map_while(Result::ok)
         .filter_map(|s| re.find(&s).and_then(|m| Some(m.as_str().to_string())))
         .map(|m| NixpkgsHammerMessage {
             msg: format!("Stale substituteInPlace detected.\n{}", m),
