@@ -20,10 +20,10 @@ pub fn walk_attrpath_values_filter_attrpath<'a>(
     // only the nodes where the key is equal to `key`.
     walk_kind(node, NODE_ATTRPATH_VALUE)
         .filter_map(|element| element.into_node())
-        .filter_map(|node| AttrpathValue::cast(node))
+        .filter_map(AttrpathValue::cast)
         .filter(move |pair| {
             pair.attrpath()
-                .map_or(false, |e| e.syntax().to_string() == key.to_string())
+                .is_some_and(|e| e.syntax().to_string() == key)
         })
 }
 

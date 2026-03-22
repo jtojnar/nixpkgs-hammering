@@ -22,11 +22,11 @@ fn analyze_single_file(
     let report = log
         .lines()
         .map_while(Result::ok)
-        .filter_map(|s| re.find(&s).and_then(|m| Some(m.as_str().to_string())))
+        .filter_map(|s| re.find(&s).map(|m| m.as_str().to_string()))
         .map(|m| NixpkgsHammerMessage {
-            msg: format!("Stale substituteInPlace detected.\n{}", m),
+            msg: format!("Stale substituteInPlace detected.\n{m}"),
             name: "stale-substitute",
-            locations: attr.location.iter().map(|x| x.clone()).collect(),
+            locations: attr.location.iter().cloned().collect(),
             link: true,
         })
         .collect();

@@ -47,19 +47,11 @@ fn main() -> Result<(), String> {
 
     // Absolutize so we can refer to it from Nix.
     let nix_file = if let Some(file) = file {
-        file.canonicalize().map_err(|err| {
-            format!(
-                "Unable to resolve path to Nix expression: {}",
-                err.to_string()
-            )
-        })?
+        file.canonicalize()
+            .map_err(|err| format!("Unable to resolve path to Nix expression: {err}"))?
     } else {
-        std::env::current_dir().map_err(|err| {
-            format!(
-                "Unable to determine current working directory: {}",
-                err.to_string()
-            )
-        })?
+        std::env::current_dir()
+            .map_err(|err| format!("Unable to determine current working directory: {err}"))?
     };
 
     hammer(Config {

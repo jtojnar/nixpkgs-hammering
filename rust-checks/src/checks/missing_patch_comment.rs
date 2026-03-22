@@ -32,7 +32,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
         let value = pair
             .value()
             .ok_or("Internal logic error: Unable to extract value from key/value pair")?;
-        let contained_nonnested_lists = walk_kind(&value.syntax(), NODE_LIST).filter(|elem| {
+        let contained_nonnested_lists = walk_kind(value.syntax(), NODE_LIST).filter(|elem| {
             // As we’re walking down the tree looking for list nodes under `pair`, we don’t
             // want to walk too deep. We’re looking for lists, but we don’t want to find
             // any lists that are inside other lists, since those are likely not patches
@@ -77,9 +77,9 @@ fn process_patch_list(
     // one of those, look for a comment within AST of the element.
     for item in patchlist.items() {
         let item = item.syntax();
-        let has_comment_above = find_comment_above(&item).is_some();
-        let has_comment_within = find_comment_within(&item).is_some();
-        let has_comment_after = find_comment_after(&item).is_some();
+        let has_comment_above = find_comment_above(item).is_some();
+        let has_comment_within = find_comment_within(item).is_some();
+        let has_comment_after = find_comment_after(item).is_some();
         let has_comment = has_comment_above || has_comment_within || has_comment_after;
 
         if !has_comment {

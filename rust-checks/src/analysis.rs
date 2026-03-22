@@ -46,17 +46,17 @@ pub fn analyze_log_files(
         .filter(|a| Path::new(&a.output.as_ref().unwrap()).exists())
     {
         let mut program = Command::new("nix")
-            .args(&[
+            .args([
                 "--experimental-features",
                 "nix-command",
                 "log",
-                &attr.output.as_ref().unwrap(),
+                attr.output.as_ref().unwrap(),
             ])
             .stdout(Stdio::piped())
             .spawn()?;
 
         let logreader = BufReader::new(program.stdout.take().unwrap());
-        let checkresult = analyzer(logreader, &attr)?;
+        let checkresult = analyzer(logreader, attr)?;
         report.insert(attr.name.clone(), checkresult);
     }
 

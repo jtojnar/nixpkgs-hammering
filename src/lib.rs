@@ -53,19 +53,19 @@ fn run_checks(
         return Ok(HashMap::new());
     }
 
-    let encoded_attrs = serde_json::to_string(attrs)
-        .map_err(|err| format!("Unable to serialize attrs: {}", err.to_string()))?;
+    let encoded_attrs =
+        serde_json::to_string(attrs).map_err(|err| format!("Unable to serialize attrs: {err}"))?;
     let mut result = HashMap::new();
 
     if !excluded_rules.contains("no-build-output") {
         let names_without_outputs = attrs
-            .into_iter()
+            .iter()
             .filter(|a| a.output.as_ref().is_some_and(|o| o.exists()))
             .map(|a| a.name.clone());
         for name in names_without_outputs {
             result
                 .entry(name.clone())
-                .or_insert_with(|| Vec::new())
+                .or_insert_with(Vec::new)
                 .push(Report {
                     name: "no-build-output".to_owned(),
                     msg: format!(
@@ -93,21 +93,16 @@ fn run_checks(
                 ))
             );
 
-            format!("Unable to execute rule ‘{name}’: {}", err.to_string())
+            format!("Unable to execute rule ‘{name}’: {err}")
         })?;
 
         if !json_text.is_empty() {
-            let results: HashMap<String, Vec<Report>> =
-                serde_json::from_str(&json_text).map_err(|err| {
-                    format!(
-                        "Unable to parse result of rule ‘{name}’: {}",
-                        err.to_string()
-                    )
-                })?;
+            let results: HashMap<String, Vec<Report>> = serde_json::from_str(&json_text)
+                .map_err(|err| format!("Unable to parse result of rule ‘{name}’: {err}"))?;
             for (attr_name, reports) in results.into_iter() {
                 result
                     .entry(attr_name)
-                    .or_insert_with(|| Vec::new())
+                    .or_insert_with(Vec::new)
                     .extend(reports)
             }
         }
@@ -120,11 +115,11 @@ fn concatenate_messages(
     report_sources: &mut [HashMap<String, Vec<Report>>],
 ) -> HashMap<String, Vec<Report>> {
     let mut result = HashMap::new();
-    for m in report_sources.into_iter() {
+    for m in report_sources.iter_mut() {
         for (attr_name, mut report) in m.drain() {
             result
                 .entry(attr_name.clone())
-                .or_insert_with(|| Vec::new())
+                .or_insert_with(Vec::new)
                 .append(&mut report);
         }
     }
@@ -170,13 +165,8 @@ fn nix_eval_json(
     let json_text = run_command_with_input("nix-instantiate", &args, &expr)?;
 
     let mut result = HashMap::new();
-    let results: HashMap<String, OverlayCheckResult> =
-        serde_json::from_str(&json_text).map_err(|err| {
-            format!(
-                "Unable to parse result of overlay checks: {} {json_text}",
-                err.to_string()
-            )
-        })?;
+    let results: HashMap<String, OverlayCheckResult> = serde_json::from_str(&json_text)
+        .map_err(|err| format!("Unable to parse result of overlay checks: {err} {json_text}"))?;
     for (
         name,
         OverlayCheckResult {
@@ -195,7 +185,7 @@ fn nix_eval_json(
         };
         result
             .entry(attr)
-            .or_insert_with(|| Vec::new())
+            .or_insert_with(Vec::new)
             .append(&mut report);
     }
 
@@ -229,7 +219,7 @@ fn render_code_location_ansi(loc: SourceLocation) -> String {
     let column = loc.column.unwrap_or(1);
     let pointer = " ".repeat(column - 1) + "^";
     let mut rendered_loc_parts = vec![loc.file.to_string_lossy().to_string(), line_no.to_string()];
-    if !loc.column.is_none() {
+    if loc.column.is_some() {
         let column_no = loc.line.to_string();
         rendered_loc_parts.push(column_no);
     }
@@ -263,7 +253,7 @@ fn render_report_ansi(report: Report) -> String {
         ));
     }
 
-    return message_lines.join("\n");
+    message_lines.join("\n")
 }
 
 pub fn hammer(config: Config) -> Result<(), String> {
@@ -335,18 +325,13 @@ pub fn hammer(config: Config) -> Result<(), String> {
     let mut overlay_expressions = vec![];
     let generators = read_dir(&overlay_generators_path).map_err(|err| {
         format!(
-            "Unable to list contents of overlays directory ‘{}’: {}",
+            "Unable to list contents of overlays directory ‘{}’: {err}",
             overlay_generators_path.display(),
-            err.to_string()
         )
     })?;
     for overlay_generator in generators {
-        let overlay_generator = overlay_generator.map_err(|err| {
-            format!(
-                "Error reading overlays directory contents: {}",
-                err.to_string()
-            )
-        })?;
+        let overlay_generator = overlay_generator
+            .map_err(|err| format!("Error reading overlays directory contents: {err}"))?;
         if overlay_generator
             .path()
             .file_stem()
@@ -406,12 +391,12 @@ pub fn hammer(config: Config) -> Result<(), String> {
     );
 
     if config.show_trace {
-        eprintln!("Nix expression:\n{}", all_messages_nix);
+        eprintln!("Nix expression:\n{all_messages_nix}");
     }
 
     let overlay_data = nix_eval_json(all_messages_nix, config.show_trace)?;
     let reports = run_checks(
-        &overlay_data.keys().map(|k| k.clone()).collect::<Vec<_>>(),
+        &overlay_data.keys().cloned().collect::<Vec<_>>(),
         &HashSet::from_iter(config.excluded_rules),
     )?;
     let overlay_reports = HashMap::from_iter(
@@ -423,8 +408,8 @@ pub fn hammer(config: Config) -> Result<(), String> {
 
     if config.json {
         let encoded_messages = serde_json::to_string(&all_messages)
-            .map_err(|err| format!("Unable to serialize result messages: {}", err.to_string()))?;
-        println!("{}", encoded_messages);
+            .map_err(|err| format!("Unable to serialize result messages: {err}"))?;
+        println!("{encoded_messages}");
     } else {
         for (attr_name, reports) in all_messages.into_iter() {
             eprintln!(
@@ -443,7 +428,7 @@ pub fn hammer(config: Config) -> Result<(), String> {
             } else {
                 eprintln!("{}", green("No issues found."));
             }
-            eprintln!("");
+            eprintln!();
         }
     }
 

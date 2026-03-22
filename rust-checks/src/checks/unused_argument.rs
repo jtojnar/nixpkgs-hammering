@@ -52,7 +52,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
             .and_then(|param| Pattern::cast(param.syntax().clone()))
             .unwrap();
 
-        let identifiers_in_body: Vec<Ident> = walk_kind(&body.syntax(), NODE_IDENT)
+        let identifiers_in_body: Vec<Ident> = walk_kind(body.syntax(), NODE_IDENT)
             .filter_map(|elem| elem.into_node())
             .filter_map(Ident::cast)
             // Filter out identifiers that are acting as keys in an attrset
@@ -73,7 +73,7 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
                     .pat_entries()
                     .filter_map(|entry| entry.default())
                     .flat_map(|e| {
-                        walk_kind(&e.syntax(), NODE_IDENT)
+                        walk_kind(e.syntax(), NODE_IDENT)
                             .filter_map(|el| el.into_node())
                             .filter_map(Ident::cast)
                     }),
@@ -107,8 +107,5 @@ fn analyze_single_file(files: &Files<String>, file_id: FileId) -> Result<Report,
 }
 
 fn ident_is_attrset_key(node: &SyntaxNode) -> bool {
-    match node.parent() {
-        Some(p) if p.kind() == NODE_ATTRPATH => true,
-        _ => false,
-    }
+    node.parent().is_some_and(|p| p.kind() == NODE_ATTRPATH)
 }

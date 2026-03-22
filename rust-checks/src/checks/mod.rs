@@ -13,7 +13,7 @@ pub use unused_argument::run as unused_argument;
 
 pub type Check = fn(Vec<CheckedAttr>) -> Result<String, Box<dyn Error>>;
 
-pub const ALL: [(&'static str, Check); 4] = [
+pub const ALL: [(&str, Check); 4] = [
     ("missing-patch-comment", missing_patch_comment),
     ("no-uri-literals", no_uri_literals),
     ("stale-substitute", stale_substitute),
