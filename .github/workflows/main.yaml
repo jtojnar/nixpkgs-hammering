@@ -15,7 +15,7 @@ jobs:
         fetch-depth: 0
 
     - name: Install Nix
-      uses: cachix/install-nix-action@v31
+      uses: cachix/install-nix-action@v32
 
     - name: Run tests
       run: nix develop -c cargo test
